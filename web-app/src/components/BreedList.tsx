@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import { breedsApi } from '../services/api';
 import { DogBreed } from '../types';
 import { BreedCard } from './BreedCard';

@@ -2,7 +2,6 @@ import axios from 'axios';
 import { 
   DogBreed, 
   CreateDogBreedRequest, 
-  UpdateDogBreedRequest, 
   ApiResponse, 
   PaginatedResponse 
 } from '../types';

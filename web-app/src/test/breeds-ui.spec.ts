@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { createdBreedNames } from './breedCleanup';
 
 test.describe('Dog Breeds UI', () => {
   test('Breed list loads and displays at least one breed', async ({ page }) => {
