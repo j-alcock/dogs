@@ -1,0 +1,457 @@
+{
+  "consumer": {
+    "name": "DogBreedsWebApp"
+  },
+  "interactions": [
+    {
+      "description": "a health check request",
+      "providerState": "API is running",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/health"
+      },
+      "response": {
+        "body": {
+          "data": {
+            "status": "OK",
+            "timestamp": "2025-07-01T05:16:15.977Z"
+          },
+          "message": "Dog Breeds API is running",
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.data.timestamp": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for non-existent breed",
+      "providerState": "breed does not exist",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/breeds/999"
+      },
+      "response": {
+        "body": {
+          "error": "Breed not found",
+          "success": false
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a request to create a new breed",
+      "providerState": "database is empty",
+      "request": {
+        "body": {
+          "breed_group": "Herding",
+          "description": "The Border Collie is a working and herding dog breed.",
+          "height_cm": {
+            "max": 56,
+            "min": 46
+          },
+          "image_url": "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=400&h=300&fit=crop",
+          "life_span": "12-15 years",
+          "name": "Border Collie",
+          "temperament": "Intelligent, Energetic, Responsive",
+          "weight_kg": {
+            "max": 20,
+            "min": 14
+          }
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        "method": "POST",
+        "path": "/api/breeds"
+      },
+      "response": {
+        "body": {
+          "data": {
+            "breed_group": "Herding",
+            "created_at": "2025-07-01T03:28:30",
+            "description": "The Border Collie is a working and herding dog breed.",
+            "height_cm": {
+              "max": 56,
+              "min": 46
+            },
+            "id": 2,
+            "image_url": "https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=400&h=300&fit=crop",
+            "life_span": "12-15 years",
+            "name": "Border Collie",
+            "temperament": "Intelligent, Energetic, Responsive",
+            "updated_at": "2025-07-01T03:28:30",
+            "weight_kg": {
+              "max": 20,
+              "min": 14
+            }
+          },
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.data.created_at": {
+            "match": "type"
+          },
+          "$.body.data.id": {
+            "match": "type"
+          },
+          "$.body.data.updated_at": {
+            "match": "type"
+          }
+        },
+        "status": 201
+      }
+    },
+    {
+      "description": "a request for breed with id 1",
+      "providerState": "has breed with id 1",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/breeds/1"
+      },
+      "response": {
+        "body": {
+          "data": {
+            "breed_group": "Sporting",
+            "created_at": "2025-07-01T03:28:30",
+            "description": "The Golden Retriever is a large-sized breed of dog bred as gun dogs to retrieve shot waterfowl.",
+            "height_cm": {
+              "max": 61,
+              "min": 55
+            },
+            "id": 1,
+            "image_url": "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop",
+            "life_span": "10-12 years",
+            "name": "Golden Retriever",
+            "temperament": "Friendly, Intelligent, Devoted",
+            "updated_at": "2025-07-01T03:28:30",
+            "weight_kg": {
+              "max": 34,
+              "min": 25
+            }
+          },
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.data.created_at": {
+            "match": "type"
+          },
+          "$.body.data.id": {
+            "match": "type"
+          },
+          "$.body.data.updated_at": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to delete breed with id 1",
+      "providerState": "has breed with id 1",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "DELETE",
+        "path": "/api/breeds/1"
+      },
+      "response": {
+        "body": {
+          "message": "Breed deleted successfully",
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request to update breed with id 1",
+      "providerState": "has breed with id 1",
+      "request": {
+        "body": {
+          "description": "Updated description for Golden Retriever"
+        },
+        "headers": {
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        },
+        "method": "PUT",
+        "path": "/api/breeds/1"
+      },
+      "response": {
+        "body": {
+          "data": {
+            "breed_group": "Sporting",
+            "created_at": "2025-07-01T03:28:30",
+            "description": "Updated description for Golden Retriever",
+            "height_cm": {
+              "max": 61,
+              "min": 55
+            },
+            "id": 1,
+            "image_url": "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop",
+            "life_span": "10-12 years",
+            "name": "Golden Retriever",
+            "temperament": "Friendly, Intelligent, Devoted",
+            "updated_at": "2025-07-01T03:28:30",
+            "weight_kg": {
+              "max": 34,
+              "min": 25
+            }
+          },
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.data.created_at": {
+            "match": "type"
+          },
+          "$.body.data.id": {
+            "match": "type"
+          },
+          "$.body.data.updated_at": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a request for all breeds",
+      "providerState": "has breeds in database",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/breeds",
+        "query": "limit=10&page=1"
+      },
+      "response": {
+        "body": {
+          "data": [
+            {
+              "breed_group": "Sporting",
+              "created_at": "2025-07-01T03:28:30",
+              "description": "The Golden Retriever is a large-sized breed of dog bred as gun dogs to retrieve shot waterfowl.",
+              "height_cm": {
+                "max": 61,
+                "min": 55
+              },
+              "id": 1,
+              "image_url": "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop",
+              "life_span": "10-12 years",
+              "name": "Golden Retriever",
+              "temperament": "Friendly, Intelligent, Devoted",
+              "updated_at": "2025-07-01T03:28:30",
+              "weight_kg": {
+                "max": 34,
+                "min": 25
+              }
+            }
+          ],
+          "pagination": {
+            "limit": 10,
+            "page": 1,
+            "total": 1,
+            "totalPages": 1
+          },
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.data": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.data[*].breed_group": {
+            "match": "type"
+          },
+          "$.body.data[*].created_at": {
+            "match": "type"
+          },
+          "$.body.data[*].description": {
+            "match": "type"
+          },
+          "$.body.data[*].height_cm.max": {
+            "match": "type"
+          },
+          "$.body.data[*].height_cm.min": {
+            "match": "type"
+          },
+          "$.body.data[*].id": {
+            "match": "type"
+          },
+          "$.body.data[*].image_url": {
+            "match": "type"
+          },
+          "$.body.data[*].life_span": {
+            "match": "type"
+          },
+          "$.body.data[*].name": {
+            "match": "type"
+          },
+          "$.body.data[*].temperament": {
+            "match": "type"
+          },
+          "$.body.data[*].updated_at": {
+            "match": "type"
+          },
+          "$.body.data[*].weight_kg.max": {
+            "match": "type"
+          },
+          "$.body.data[*].weight_kg.min": {
+            "match": "type"
+          },
+          "$.body.pagination.limit": {
+            "match": "type"
+          },
+          "$.body.pagination.page": {
+            "match": "type"
+          },
+          "$.body.pagination.total": {
+            "match": "type"
+          },
+          "$.body.pagination.totalPages": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "a search request for retriever breeds",
+      "providerState": "has breeds in database",
+      "request": {
+        "headers": {
+          "Accept": "application/json"
+        },
+        "method": "GET",
+        "path": "/api/breeds/search",
+        "query": "q=retriever"
+      },
+      "response": {
+        "body": {
+          "data": [
+            {
+              "breed_group": "Sporting",
+              "created_at": "2025-07-01T03:28:30",
+              "description": "The Golden Retriever is a large-sized breed of dog bred as gun dogs to retrieve shot waterfowl.",
+              "height_cm": {
+                "max": 61,
+                "min": 55
+              },
+              "id": 1,
+              "image_url": "https://images.unsplash.com/photo-1552053831-71594a27632d?w=400&h=300&fit=crop",
+              "life_span": "10-12 years",
+              "name": "Golden Retriever",
+              "temperament": "Friendly, Intelligent, Devoted",
+              "updated_at": "2025-07-01T03:28:30",
+              "weight_kg": {
+                "max": 34,
+                "min": 25
+              }
+            }
+          ],
+          "success": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "$.body.data": {
+            "match": "type",
+            "min": 1
+          },
+          "$.body.data[*].breed_group": {
+            "match": "type"
+          },
+          "$.body.data[*].created_at": {
+            "match": "type"
+          },
+          "$.body.data[*].description": {
+            "match": "type"
+          },
+          "$.body.data[*].height_cm.max": {
+            "match": "type"
+          },
+          "$.body.data[*].height_cm.min": {
+            "match": "type"
+          },
+          "$.body.data[*].id": {
+            "match": "type"
+          },
+          "$.body.data[*].image_url": {
+            "match": "type"
+          },
+          "$.body.data[*].life_span": {
+            "match": "type"
+          },
+          "$.body.data[*].name": {
+            "match": "type"
+          },
+          "$.body.data[*].temperament": {
+            "match": "type"
+          },
+          "$.body.data[*].updated_at": {
+            "match": "type"
+          },
+          "$.body.data[*].weight_kg.max": {
+            "match": "type"
+          },
+          "$.body.data[*].weight_kg.min": {
+            "match": "type"
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "10.4.1"
+    },
+    "pactRust": {
+      "ffi": "0.4.0",
+      "models": "1.0.4"
+    },
+    "pactSpecification": {
+      "version": "2.0.0"
+    }
+  },
+  "provider": {
+    "name": "DogBreedsAPI"
+  }
+}
