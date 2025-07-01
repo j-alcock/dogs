@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import { DatabaseService } from '../database';
 import { DogBreed, CreateDogBreedRequest, ApiResponse, PaginatedResponse } from '../types';
+import { DuplicateBreedError } from '../errors/duplicateBreedError';
 
 export class BreedController {
   private dbService: DatabaseService;
@@ -201,12 +202,30 @@ export class BreedController {
       res.status(201).json(response);
     } catch (error: any) {
       console.error('Error creating breed:', error);
-      
-      let errorMessage = 'Internal server error';
-      if (error.message && error.message.includes('UNIQUE constraint failed')) {
-        errorMessage = 'A breed with this name already exists';
+      // Enhanced debug logging
+      console.error('Error (full object):', error);
+      try {
+        console.error('Error (JSON):', JSON.stringify(error));
+      } catch (e) {
+        console.error('Error could not be stringified:', e);
       }
-
+      if (
+        (error && error.code === 'DUPLICATE_BREED') ||
+        (error && error.message === 'A breed with this name already exists')
+      ) {
+        const response: ApiResponse<null> = {
+          success: false,
+          error: error.message
+        };
+        res.status(400).json(response);
+        return;
+      }
+      let errorMessage = 'Internal server error';
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.error) {
+        errorMessage = error.error;
+      }
       const response: ApiResponse<null> = {
         success: false,
         error: errorMessage
@@ -281,12 +300,20 @@ export class BreedController {
       res.status(200).json(response);
     } catch (error: any) {
       console.error('Error updating breed:', error);
-      
-      let errorMessage = 'Internal server error';
-      if (error.message && error.message.includes('UNIQUE constraint failed')) {
-        errorMessage = 'A breed with this name already exists';
+      if (error && error.code === 'DUPLICATE_BREED') {
+        const response: ApiResponse<null> = {
+          success: false,
+          error: error.message
+        };
+        res.status(400).json(response);
+        return;
       }
-
+      let errorMessage = 'Internal server error';
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.error) {
+        errorMessage = error.error;
+      }
       const response: ApiResponse<null> = {
         success: false,
         error: errorMessage

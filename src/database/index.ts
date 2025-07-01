@@ -1,5 +1,7 @@
+console.log('>>> Using DatabaseService from dogs/src/database/index.ts');
 import sqlite3 from 'sqlite3';
 import { DatabaseConfig, DogBreed, CreateDogBreedRequest, UpdateDogBreedRequest } from '../types';
+import { DuplicateBreedError } from '../errors/duplicateBreedError';
 
 export class DatabaseService {
   private db: sqlite3.Database;
@@ -239,7 +241,17 @@ export class DatabaseService {
         breedData.image_url || null
       ], function(err) {
         if (err) {
-          reject(err);
+          const errorAny = err as any;
+          console.error('[DB] createBreed error:', errorAny);
+          if (
+            (errorAny.code && errorAny.code === 'SQLITE_CONSTRAINT') ||
+            (errorAny.message && errorAny.message.includes('UNIQUE constraint failed: dog_breeds.name'))
+          ) {
+            console.error('[DB] Wrapping as DuplicateBreedError');
+            reject(new DuplicateBreedError());
+          } else {
+            reject(err);
+          }
           return;
         }
         // 'this' here refers to the statement, not DatabaseService, so use 'self'
