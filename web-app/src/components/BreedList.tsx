@@ -94,6 +94,7 @@ export function BreedList() {
         <Link
           to="/breeds/new"
           className="btn-primary inline-flex items-center space-x-2"
+          data-testid="add-breed-btn"
         >
           <Plus className="h-4 w-4" />
           <span>Add Breed</span>
@@ -112,6 +113,7 @@ export function BreedList() {
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="input pl-10"
+              data-testid="search-bar"
             />
           </div>
         </div>

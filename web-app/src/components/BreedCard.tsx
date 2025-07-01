@@ -9,11 +9,11 @@ interface BreedCardProps {
 
 export function BreedCard({ breed, onDelete }: BreedCardProps) {
   return (
-    <div className="card hover:shadow-md transition-shadow duration-200">
+    <div className="card hover:shadow-md transition-shadow duration-200" data-testid="breed-card">
       {/* Image */}
       <div className="aspect-w-16 aspect-h-9 mb-4">
         {breed.image_url ? (
-          <Link to={`/breeds/${breed.id}`} tabIndex={-1} aria-label={`View details for ${breed.name}`}>
+          <Link to={`/breeds/${breed.id}`} tabIndex={-1} aria-label={`View details for ${breed.name}`} data-testid="breed-image-link">
             <img
               src={breed.image_url}
               alt={breed.name}
@@ -34,7 +34,7 @@ export function BreedCard({ breed, onDelete }: BreedCardProps) {
       {/* Content */}
       <div className="space-y-3">
         <div>
-          <Link to={`/breeds/${breed.id}`} className="hover:underline focus:underline outline-none">
+          <Link to={`/breeds/${breed.id}`} className="hover:underline focus:underline outline-none" data-testid="breed-name-link">
             <h3 className="text-xl font-semibold text-gray-900 inline">{breed.name}</h3>
           </Link>
           <p className="text-sm text-gray-500">{breed.breed_group}</p>
@@ -81,6 +81,7 @@ export function BreedCard({ breed, onDelete }: BreedCardProps) {
             to={`/breeds/${breed.id}/edit`}
             className="p-2 text-gray-400 hover:text-primary-600 transition-colors"
             title="Edit breed"
+            data-testid="edit-breed-btn"
           >
             <Edit className="h-4 w-4" />
           </Link>

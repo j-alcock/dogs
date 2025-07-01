@@ -113,10 +113,18 @@ export function BreedForm() {
       if (response.success) {
         navigate('/');
       } else {
-        setError(response.error || 'Failed to save breed');
+        let backendError = 'Failed to save breed';
+        if (response.error) {
+          backendError = response.error;
+        }
+        setError(backendError);
       }
-    } catch (err) {
-      setError('Failed to save breed');
+    } catch (err: any) {
+      let backendError = 'Failed to save breed';
+      if (err.response && err.response.data && err.response.data.error) {
+        backendError = err.response.data.error;
+      }
+      setError(backendError);
       console.error('Error saving breed:', err);
     } finally {
       setLoading(false);
@@ -161,7 +169,7 @@ export function BreedForm() {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="card space-y-6">
+      <form onSubmit={handleSubmit} className="card space-y-6" data-testid="breed-form">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Name */}
           <div className="md:col-span-2">
@@ -177,6 +185,7 @@ export function BreedForm() {
               required
               className="input"
               placeholder="e.g., Golden Retriever"
+              data-testid="name"
             />
           </div>
 
@@ -192,6 +201,7 @@ export function BreedForm() {
               onChange={handleInputChange}
               required
               className="input"
+              data-testid="breed_group"
             >
               <option value="">Select a group</option>
               {breedGroups.map(group => (
@@ -214,6 +224,7 @@ export function BreedForm() {
               required
               className="input"
               placeholder="e.g., 10-12 years"
+              data-testid="life_span"
             />
           </div>
 
@@ -231,6 +242,7 @@ export function BreedForm() {
               required
               className="input"
               placeholder="e.g., Friendly, Intelligent, Devoted"
+              data-testid="temperament"
             />
           </div>
 
@@ -250,6 +262,7 @@ export function BreedForm() {
               max="200"
               className="input"
               placeholder="e.g., 55"
+              data-testid="height_min"
             />
           </div>
 
@@ -268,6 +281,7 @@ export function BreedForm() {
               max="200"
               className="input"
               placeholder="e.g., 61"
+              data-testid="height_max"
             />
           </div>
 
@@ -288,6 +302,7 @@ export function BreedForm() {
               step="0.1"
               className="input"
               placeholder="e.g., 25"
+              data-testid="weight_min"
             />
           </div>
 
@@ -307,6 +322,7 @@ export function BreedForm() {
               step="0.1"
               className="input"
               placeholder="e.g., 34"
+              data-testid="weight_max"
             />
           </div>
 
@@ -323,6 +339,7 @@ export function BreedForm() {
               onChange={handleInputChange}
               className="input"
               placeholder="https://example.com/image.jpg"
+              data-testid="image_url"
             />
           </div>
 
@@ -340,6 +357,7 @@ export function BreedForm() {
               rows={4}
               className="input"
               placeholder="Describe the breed's characteristics, history, and personality..."
+              data-testid="description"
             />
           </div>
         </div>
@@ -353,6 +371,7 @@ export function BreedForm() {
             type="submit"
             disabled={loading}
             className="btn-primary inline-flex items-center"
+            data-testid="submit-breed-btn"
           >
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
