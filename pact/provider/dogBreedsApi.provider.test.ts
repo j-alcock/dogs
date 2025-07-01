@@ -13,6 +13,7 @@ describe('Dog Breeds API Provider Contract Tests', () => {
   let server: any;
   let dbService: DatabaseService;
   let app: express.Application;
+  let port: number;
 
   beforeAll(async () => {
     // Create database service instance
@@ -89,9 +90,13 @@ describe('Dog Breeds API Provider Contract Tests', () => {
       res.status(500).json(response);
     });
     
-    // Start the API server on a different port to avoid conflicts
-    server = app.listen(3001, () => {
-      console.log('Provider API server running on port 3001');
+    // Start the API server on a random available port to avoid conflicts
+    await new Promise<void>((resolve) => {
+      server = app.listen(0, () => {
+        port = (server.address() as any).port;
+        console.log('Provider API server running on port', port);
+        resolve();
+      });
     });
   });
 
@@ -116,7 +121,7 @@ describe('Dog Breeds API Provider Contract Tests', () => {
   it('should validate the expectations of DogBreedsWebApp', async () => {
     const opts = {
       provider: pactConfig.provider,
-      providerBaseUrl: 'http://localhost:3001',
+      providerBaseUrl: `http://localhost:${port}`,
       pactUrls: [path.resolve(process.cwd(), 'pacts', 'dogbreedswebapp-dogbreedsapi.json')],
       publishVerificationResult: false,
       providerVersion: '1.0.0',

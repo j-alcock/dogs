@@ -13,15 +13,17 @@ export function BreedCard({ breed, onDelete }: BreedCardProps) {
       {/* Image */}
       <div className="aspect-w-16 aspect-h-9 mb-4">
         {breed.image_url ? (
-          <img
-            src={breed.image_url}
-            alt={breed.name}
-            className="w-full h-48 object-cover rounded-t"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = 'https://placehold.co/400x300?text=No+Image';
-            }}
-          />
+          <Link to={`/breeds/${breed.id}`} tabIndex={-1} aria-label={`View details for ${breed.name}`}>
+            <img
+              src={breed.image_url}
+              alt={breed.name}
+              className="w-full h-48 object-cover rounded-t hover:opacity-80 transition-opacity"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://placehold.co/400x300?text=No+Image';
+              }}
+            />
+          </Link>
         ) : (
           <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
             <span className="text-gray-500">No image</span>
@@ -32,7 +34,9 @@ export function BreedCard({ breed, onDelete }: BreedCardProps) {
       {/* Content */}
       <div className="space-y-3">
         <div>
-          <h3 className="text-xl font-semibold text-gray-900">{breed.name}</h3>
+          <Link to={`/breeds/${breed.id}`} className="hover:underline focus:underline outline-none">
+            <h3 className="text-xl font-semibold text-gray-900 inline">{breed.name}</h3>
+          </Link>
           <p className="text-sm text-gray-500">{breed.breed_group}</p>
         </div>
 
