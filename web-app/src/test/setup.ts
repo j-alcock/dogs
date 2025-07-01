@@ -12,7 +12,7 @@ export const pactConfig = {
   spec: 2,
   cors: true,
   host: '127.0.0.1',
-  port: 3000,
+  port: 1234,
 };
 
 // Create Pact instance
@@ -51,7 +51,3 @@ base.afterAll(async () => {
 
 // Test timeout
 jest.setTimeout(30000);
-
-const duplicateName = 'Golden Retriever';
-// ... fill the form as before ...
-await expect(page.locator('.text-red-800')).toHaveText(`A breed with the name "${duplicateName}" already exists`); 

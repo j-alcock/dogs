@@ -153,6 +153,7 @@ export function BreedList() {
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
             className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="pagination-prev"
           >
             Previous
           </button>
@@ -163,6 +164,7 @@ export function BreedList() {
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
             className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            data-testid="pagination-next"
           >
             Next
           </button>

@@ -17,7 +17,8 @@
     "test:pact:provider": "jest --testPathPattern=pact/provider",
     "pact:publish": "pact-broker publish pacts --consumer-app-version=$npm_package_version --broker-base-url=http://localhost:9292",
     "lint": "eslint src/**/*.ts",
-    "lint:fix": "eslint src/**/*.ts --fix"
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "test:all": "npm run test:unit && npm run test:pact && cd web-app && npx playwright test"
   },
   "keywords": [
     "dog",
