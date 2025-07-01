@@ -1,0 +1,906 @@
+{
+  "openapi" : "3.0.0",
+  "info" : {
+    "title" : "Dog Breeds API",
+    "description" : "A comprehensive REST API for managing dog breeds with full CRUD operations, search, and pagination.",
+    "contact" : {
+      "name" : "API Support",
+      "email" : "support@dogbreedsapi.com"
+    },
+    "license" : {
+      "name" : "MIT",
+      "url" : "https://opensource.org/licenses/MIT"
+    },
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "http://localhost:3000",
+    "description" : "Development server"
+  } ],
+  "tags" : [ {
+    "name" : "Health",
+    "description" : "Health check and API information endpoints"
+  }, {
+    "name" : "Breeds",
+    "description" : "Dog breed management operations"
+  } ],
+  "paths" : {
+    "/api/breeds/search" : {
+      "get" : {
+        "tags" : [ "Breeds" ],
+        "summary" : "Search breeds by query",
+        "description" : "Search for dog breeds by name, breed group, or temperament",
+        "parameters" : [ {
+          "name" : "q",
+          "in" : "query",
+          "description" : "Search query for breed name, group, or temperament",
+          "required" : true,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "minLength" : 1,
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful search results",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request - missing or invalid query parameter",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breeds" : {
+      "get" : {
+        "tags" : [ "Breeds" ],
+        "summary" : "Get all breeds with pagination",
+        "description" : "Retrieve a paginated list of all dog breeds",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "Page number for pagination",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "minimum" : 1,
+            "type" : "integer",
+            "default" : 1
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "description" : "Number of items per page",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "maximum" : 100,
+            "minimum" : 1,
+            "type" : "integer",
+            "default" : 10
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful response with paginated breeds",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/PaginatedResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request - invalid pagination parameters",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Breeds" ],
+        "summary" : "Create a new breed",
+        "description" : "Create a new dog breed with the provided information",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateDogBreedRequest"
+              },
+              "example" : {
+                "name" : "Border Collie",
+                "breed_group" : "Herding",
+                "temperament" : "Intelligent, Energetic, Responsive",
+                "life_span" : "12-15 years",
+                "height_cm" : {
+                  "min" : 46,
+                  "max" : 56
+                },
+                "weight_kg" : {
+                  "min" : 14,
+                  "max" : 20
+                },
+                "description" : "The Border Collie is a working and herding dog breed.",
+                "image_url" : "https://example.com/border-collie.jpg"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Breed created successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_201"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request - validation errors",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict - breed name already exists",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breeds/{id}" : {
+      "get" : {
+        "tags" : [ "Breeds" ],
+        "summary" : "Get breed by ID",
+        "description" : "Retrieve a specific dog breed by its unique identifier",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Breed ID",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successful response with breed data",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_1"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Breed not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Breeds" ],
+        "summary" : "Update an existing breed",
+        "description" : "Update a dog breed with the provided information (partial updates supported)",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Breed ID",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/breeds_id_body"
+              },
+              "example" : {
+                "name" : "Updated Golden Retriever",
+                "description" : "Updated description for the Golden Retriever"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Breed updated successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_2"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "Bad request - validation errors",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Breed not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "Conflict - breed name already exists",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Breeds" ],
+        "summary" : "Delete a breed",
+        "description" : "Delete a dog breed by its unique identifier",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "Breed ID",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "minimum" : 1,
+            "type" : "integer"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Breed deleted successfully",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_3"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Breed not found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "Internal server error",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health" : {
+      "get" : {
+        "tags" : [ "Health" ],
+        "summary" : "Health check endpoint",
+        "description" : "Check if the API is running and healthy",
+        "responses" : {
+          "200" : {
+            "description" : "API is healthy",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/" : {
+      "get" : {
+        "tags" : [ "Health" ],
+        "summary" : "API information",
+        "description" : "Get information about the API and available endpoints",
+        "responses" : {
+          "200" : {
+            "description" : "API information",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/inline_response_200_4"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "DogBreed" : {
+        "required" : [ "breed_group", "description", "height_cm", "life_span", "name", "temperament", "weight_kg" ],
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "integer",
+            "example" : 1
+          },
+          "name" : {
+            "type" : "string",
+            "example" : "Golden Retriever"
+          },
+          "breed_group" : {
+            "type" : "string",
+            "example" : "Sporting"
+          },
+          "temperament" : {
+            "type" : "string",
+            "example" : "Intelligent, Friendly, Devoted"
+          },
+          "life_span" : {
+            "type" : "string",
+            "example" : "10-12 years"
+          },
+          "height_cm" : {
+            "$ref" : "#/components/schemas/DogBreed_height_cm"
+          },
+          "weight_kg" : {
+            "$ref" : "#/components/schemas/DogBreed_weight_kg"
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "The Golden Retriever is a large-sized breed of dog..."
+          },
+          "image_url" : {
+            "type" : "string",
+            "example" : "https://example.com/golden-retriever.jpg"
+          },
+          "created_at" : {
+            "type" : "string",
+            "format" : "date-time"
+          },
+          "updated_at" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "CreateDogBreedRequest" : {
+        "required" : [ "breed_group", "description", "height_cm", "life_span", "name", "temperament", "weight_kg" ],
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "example" : "Border Collie"
+          },
+          "breed_group" : {
+            "type" : "string",
+            "example" : "Herding"
+          },
+          "temperament" : {
+            "type" : "string",
+            "example" : "Intelligent, Energetic, Responsive"
+          },
+          "life_span" : {
+            "type" : "string",
+            "example" : "12-15 years"
+          },
+          "height_cm" : {
+            "$ref" : "#/components/schemas/CreateDogBreedRequest_height_cm"
+          },
+          "weight_kg" : {
+            "$ref" : "#/components/schemas/CreateDogBreedRequest_weight_kg"
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "The Border Collie is a working and herding dog breed."
+          },
+          "image_url" : {
+            "type" : "string",
+            "example" : "https://example.com/border-collie.jpg"
+          }
+        }
+      },
+      "ApiResponse" : {
+        "required" : [ "success" ],
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "data" : {
+            "type" : "object"
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "Operation completed successfully"
+          },
+          "error" : {
+            "type" : "string"
+          }
+        }
+      },
+      "PaginatedResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "data" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DogBreed"
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "Breeds retrieved successfully"
+          },
+          "pagination" : {
+            "$ref" : "#/components/schemas/PaginatedResponse_pagination"
+          }
+        }
+      },
+      "ErrorResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "example" : false
+          },
+          "error" : {
+            "type" : "string",
+            "example" : "Validation error"
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "Invalid input data"
+          }
+        }
+      },
+      "HealthResponse" : {
+        "type" : "object",
+        "properties" : {
+          "success" : {
+            "type" : "boolean",
+            "example" : true
+          },
+          "data" : {
+            "$ref" : "#/components/schemas/HealthResponse_data"
+          },
+          "message" : {
+            "type" : "string",
+            "example" : "Dog Breeds API is running"
+          }
+        }
+      },
+      "inline_response_200" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ApiResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "data" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/components/schemas/DogBreed"
+              }
+            },
+            "message" : {
+              "type" : "string",
+              "example" : "Found 1 breeds matching \"golden\""
+            }
+          }
+        } ]
+      },
+      "inline_response_201" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ApiResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "data" : {
+              "$ref" : "#/components/schemas/DogBreed"
+            },
+            "message" : {
+              "type" : "string",
+              "example" : "Breed created successfully"
+            }
+          }
+        } ]
+      },
+      "inline_response_200_1" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ApiResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "data" : {
+              "$ref" : "#/components/schemas/DogBreed"
+            }
+          }
+        } ]
+      },
+      "apibreedsid_height_cm" : {
+        "type" : "object",
+        "properties" : {
+          "min" : {
+            "type" : "number"
+          },
+          "max" : {
+            "type" : "number"
+          }
+        }
+      },
+      "breeds_id_body" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "description" : "Updated breed name",
+            "example" : "Updated Golden Retriever"
+          },
+          "breed_group" : {
+            "type" : "string",
+            "description" : "Updated breed group",
+            "enum" : [ "Sporting", "Hound", "Working", "Terrier", "Toy", "Non-Sporting", "Herding" ]
+          },
+          "temperament" : {
+            "type" : "string",
+            "description" : "Updated temperament"
+          },
+          "life_span" : {
+            "type" : "string",
+            "description" : "Updated life span"
+          },
+          "height_cm" : {
+            "$ref" : "#/components/schemas/apibreedsid_height_cm"
+          },
+          "weight_kg" : {
+            "$ref" : "#/components/schemas/apibreedsid_height_cm"
+          },
+          "description" : {
+            "type" : "string",
+            "description" : "Updated breed description"
+          },
+          "image_url" : {
+            "type" : "string",
+            "description" : "Updated image URL",
+            "format" : "uri"
+          }
+        }
+      },
+      "inline_response_200_2" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ApiResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "data" : {
+              "$ref" : "#/components/schemas/DogBreed"
+            },
+            "message" : {
+              "type" : "string",
+              "example" : "Breed updated successfully"
+            }
+          }
+        } ]
+      },
+      "inline_response_200_3" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ApiResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "message" : {
+              "type" : "string",
+              "example" : "Breed deleted successfully"
+            }
+          }
+        } ]
+      },
+      "inline_response_200_4" : {
+        "allOf" : [ {
+          "$ref" : "#/components/schemas/ApiResponse"
+        }, {
+          "type" : "object",
+          "properties" : {
+            "data" : {
+              "$ref" : "#/components/schemas/inline_response_200_4_data"
+            },
+            "message" : {
+              "type" : "string",
+              "example" : "Welcome to the Dog Breeds API!"
+            }
+          }
+        } ]
+      },
+      "DogBreed_height_cm" : {
+        "type" : "object",
+        "properties" : {
+          "min" : {
+            "type" : "number",
+            "example" : 55
+          },
+          "max" : {
+            "type" : "number",
+            "example" : 61
+          }
+        }
+      },
+      "DogBreed_weight_kg" : {
+        "type" : "object",
+        "properties" : {
+          "min" : {
+            "type" : "number",
+            "example" : 25
+          },
+          "max" : {
+            "type" : "number",
+            "example" : 34
+          }
+        }
+      },
+      "CreateDogBreedRequest_height_cm" : {
+        "type" : "object",
+        "properties" : {
+          "min" : {
+            "type" : "number",
+            "example" : 46
+          },
+          "max" : {
+            "type" : "number",
+            "example" : 56
+          }
+        }
+      },
+      "CreateDogBreedRequest_weight_kg" : {
+        "type" : "object",
+        "properties" : {
+          "min" : {
+            "type" : "number",
+            "example" : 14
+          },
+          "max" : {
+            "type" : "number",
+            "example" : 20
+          }
+        }
+      },
+      "PaginatedResponse_pagination" : {
+        "type" : "object",
+        "properties" : {
+          "page" : {
+            "type" : "integer",
+            "example" : 1
+          },
+          "limit" : {
+            "type" : "integer",
+            "example" : 10
+          },
+          "total" : {
+            "type" : "integer",
+            "example" : 50
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "example" : 5
+          }
+        }
+      },
+      "HealthResponse_data" : {
+        "type" : "object",
+        "properties" : {
+          "status" : {
+            "type" : "string",
+            "example" : "OK"
+          },
+          "timestamp" : {
+            "type" : "string",
+            "format" : "date-time"
+          }
+        }
+      },
+      "inline_response_200_4_data" : {
+        "type" : "object",
+        "properties" : {
+          "name" : {
+            "type" : "string",
+            "example" : "Dog Breeds API"
+          },
+          "version" : {
+            "type" : "string",
+            "example" : "1.0.0"
+          },
+          "description" : {
+            "type" : "string",
+            "example" : "A TypeScript API for managing dog breeds with CRUD operations"
+          },
+          "endpoints" : {
+            "type" : "array",
+            "example" : [ "GET /api/breeds - Get all breeds (with pagination)", "GET /api/breeds/search?q=query - Search breeds" ],
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      }
+    },
+    "parameters" : {
+      "Page" : {
+        "name" : "page",
+        "in" : "query",
+        "description" : "Page number for pagination",
+        "required" : false,
+        "style" : "form",
+        "explode" : true,
+        "schema" : {
+          "minimum" : 1,
+          "type" : "integer",
+          "default" : 1
+        }
+      },
+      "Limit" : {
+        "name" : "limit",
+        "in" : "query",
+        "description" : "Number of items per page",
+        "required" : false,
+        "style" : "form",
+        "explode" : true,
+        "schema" : {
+          "maximum" : 100,
+          "minimum" : 1,
+          "type" : "integer",
+          "default" : 10
+        }
+      },
+      "SearchQuery" : {
+        "name" : "q",
+        "in" : "query",
+        "description" : "Search query for breed name, group, or temperament",
+        "required" : true,
+        "style" : "form",
+        "explode" : true,
+        "schema" : {
+          "minLength" : 1,
+          "type" : "string"
+        }
+      },
+      "BreedId" : {
+        "name" : "id",
+        "in" : "path",
+        "description" : "Breed ID",
+        "required" : true,
+        "style" : "simple",
+        "explode" : false,
+        "schema" : {
+          "minimum" : 1,
+          "type" : "integer"
+        }
+      }
+    }
+  }
+}
