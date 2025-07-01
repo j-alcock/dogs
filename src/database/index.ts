@@ -40,7 +40,7 @@ export class DatabaseService {
     });
   }
 
-  private seedDatabase(): void {
+  public seedDatabase(): void {
     const checkDataSQL = 'SELECT COUNT(*) as count FROM dog_breeds';
     
     this.db.get(checkDataSQL, (err, row: any) => {
@@ -248,7 +248,7 @@ export class DatabaseService {
             (errorAny.message && errorAny.message.includes('UNIQUE constraint failed: dog_breeds.name'))
           ) {
             console.error('[DB] Wrapping as DuplicateBreedError');
-            reject(new DuplicateBreedError());
+            reject(new DuplicateBreedError(`A breed with the name "${breedData.name}" already exists`));
           } else {
             reject(err);
           }

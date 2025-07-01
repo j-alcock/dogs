@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createdBreedNames } from './breedCleanup';
 
 test.describe('Dog Breeds UI', () => {
   test('Breed list loads and displays at least one breed', async ({ page }) => {
@@ -20,7 +21,8 @@ test.describe('Dog Breeds UI', () => {
   test('Add new breed form can be opened, filled, and submitted', async ({ page }) => {
     await page.goto('/');
     await page.click('[data-testid="add-breed-btn"]');
-    const uniqueName = `Playwright Test Breed ${Date.now()}`;
+    const uniqueName = `Playwright Test Breed ${Date.now()}-${Math.random()}`;
+    createdBreedNames.push(uniqueName);
     await page.fill('input[name="name"]', uniqueName);
     await page.selectOption('select[name="breed_group"]', { label: 'Sporting' });
     await page.fill('input[name="temperament"]', 'Friendly');

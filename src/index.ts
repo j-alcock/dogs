@@ -65,6 +65,15 @@ app.post('/_pactSetup', express.json(), async (req, res) => {
         // Clear the database for creation tests
         await dbService.clearDatabase();
         break;
+      case 'reset to seed':
+        // Clear the database and re-seed
+        await dbService.clearDatabase();
+        if (typeof dbService.seedDatabase === 'function') {
+          await dbService.seedDatabase();
+        } else {
+          console.error('seedDatabase is not a function on dbService');
+        }
+        break;
       case 'API is running':
         // API is already running
         break;

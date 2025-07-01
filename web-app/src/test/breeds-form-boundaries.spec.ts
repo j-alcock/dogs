@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createdBreedNames } from './breedCleanup';
 
 test.describe('Breed Form Boundary and Error Handling', () => {
   test.beforeEach(async ({ page }) => {
@@ -14,7 +15,9 @@ test.describe('Breed Form Boundary and Error Handling', () => {
   });
 
   test('shows error if height min > max', async ({ page }) => {
-    await page.fill('input[name="name"]', `Boundary Test ${Date.now()}`);
+    const uniqueName = `Playwright Test Breed ${Date.now()}-${Math.random()}`;
+    createdBreedNames.push(uniqueName);
+    await page.fill('input[name="name"]', uniqueName);
     await page.selectOption('select[name="breed_group"]', { label: 'Sporting' });
     await page.fill('input[name="temperament"]', 'Friendly');
     await page.fill('input[name="life_span"]', '10-12 years');
@@ -28,7 +31,9 @@ test.describe('Breed Form Boundary and Error Handling', () => {
   });
 
   test('shows error if weight min > max', async ({ page }) => {
-    await page.fill('input[name="name"]', `Boundary Test ${Date.now()}`);
+    const uniqueName = `Playwright Test Breed ${Date.now()}-${Math.random()}`;
+    createdBreedNames.push(uniqueName);
+    await page.fill('input[name="name"]', uniqueName);
     await page.selectOption('select[name="breed_group"]', { label: 'Sporting' });
     await page.fill('input[name="temperament"]', 'Friendly');
     await page.fill('input[name="life_span"]', '10-12 years');
@@ -42,7 +47,9 @@ test.describe('Breed Form Boundary and Error Handling', () => {
   });
 
   test('shows error for invalid image URL', async ({ page }) => {
-    await page.fill('input[name="name"]', `Boundary Test ${Date.now()}`);
+    const uniqueName = `Playwright Test Breed ${Date.now()}-${Math.random()}`;
+    createdBreedNames.push(uniqueName);
+    await page.fill('input[name="name"]', uniqueName);
     await page.selectOption('select[name="breed_group"]', { label: 'Sporting' });
     await page.fill('input[name="temperament"]', 'Friendly');
     await page.fill('input[name="life_span"]', '10-12 years');
@@ -58,7 +65,9 @@ test.describe('Breed Form Boundary and Error Handling', () => {
   });
 
   test('shows error for too short description', async ({ page }) => {
-    await page.fill('input[name="name"]', `Boundary Test ${Date.now()}`);
+    const uniqueName = `Playwright Test Breed ${Date.now()}-${Math.random()}`;
+    createdBreedNames.push(uniqueName);
+    await page.fill('input[name="name"]', uniqueName);
     await page.selectOption('select[name="breed_group"]', { label: 'Sporting' });
     await page.fill('input[name="temperament"]', 'Friendly');
     await page.fill('input[name="life_span"]', '10-12 years');
@@ -73,7 +82,8 @@ test.describe('Breed Form Boundary and Error Handling', () => {
 
   test('shows error for duplicate breed name', async ({ page }) => {
     // Use a known seed name
-    await page.fill('input[name="name"]', 'Golden Retriever');
+    const duplicateName = 'Golden Retriever';
+    await page.fill('input[name="name"]', duplicateName);
     await page.selectOption('select[name="breed_group"]', { label: 'Sporting' });
     await page.fill('input[name="temperament"]', 'Friendly');
     await page.fill('input[name="life_span"]', '10-12 years');
@@ -83,6 +93,6 @@ test.describe('Breed Form Boundary and Error Handling', () => {
     await page.fill('input[name="weight_max"]', '20');
     await page.fill('textarea[name="description"]', 'Boundary test.');
     await page.click('[data-testid="submit-breed-btn"]');
-    await expect(page.locator('.text-red-800')).toHaveText('A breed with this name already exists');
+    await expect(page.locator('.text-red-800')).toHaveText(`A breed with the name "${duplicateName}" already exists`); 
   });
 }); 
