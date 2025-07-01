@@ -1,6 +1,6 @@
 # Pact Contract Testing for Dog Breeds System
 
-This document describes the Pact contract testing setup for the Dog Breeds API and Web Application.
+This document describes the Pact contract testing setup for the Dog Breeds API and Web Application, including CI/CD integration and troubleshooting.
 
 ## 🎯 Overview
 
@@ -24,7 +24,7 @@ Pact is a contract testing tool that ensures the consumer (web app) and provider
 
 ```
 dogs/
-├── pact/
+├── src/pact/
 │   ├── consumer/
 │   │   └── dogBreedsApi.consumer.test.ts    # Consumer contract tests
 │   └── provider/
@@ -35,7 +35,7 @@ dogs/
 └── PACT_TESTING.md                          # This file
 
 web-app/
-├── pact/
+├── src/pact/
 │   └── consumer/
 │       └── dogBreedsApi.consumer.test.ts    # Consumer contract tests
 ├── pacts/                                    # Generated contracts
@@ -56,7 +56,7 @@ cd web-app
 npm install
 ```
 
-### 2. Start Pact Broker
+### 2. Start Pact Broker (Optional)
 
 ```bash
 cd dogs
@@ -153,6 +153,7 @@ The provider tests include state handlers for different scenarios:
 - `has breed with id 1` - Ensures specific breed exists
 - `breed does not exist` - Ensures breed doesn't exist (for 404 tests)
 - `database is empty` - Clears database for creation tests
+- `reset to seed` - Resets database to initial state
 - `API is running` - Ensures API is healthy
 
 ## 🌐 Pact Broker
@@ -182,15 +183,14 @@ The Pact broker provides a web interface to:
 
 ### CI/CD Integration
 
+The project includes GitHub Actions workflow that automatically:
+
 ```yaml
-# Example GitHub Actions workflow
-- name: Run Consumer Tests
-  run: npm run test:pact:consumer
+# GitHub Actions workflow (.github/workflows/ci.yml)
+- name: Run Pact contract tests
+  run: npm run test:pact
 
-- name: Publish Contracts
-  run: npm run pact:publish
-
-- name: Run Provider Tests
+- name: Run Pact provider verification
   run: npm run test:pact:provider
 ```
 
@@ -198,59 +198,138 @@ The Pact broker provides a web interface to:
 
 ### Common Issues
 
-1. **Port Conflicts**
-   ```bash
-   # Check if ports are in use
-   lsof -i :1234
-   lsof -i :9292
+#### 1. Provider Verification Fails
+
+**Problem**: Provider tests fail with 404 errors or body mismatches
+
+**Solutions**:
+- Ensure the provider server is running on the correct port
+- Check that all required endpoints are implemented
+- Verify Content-Type headers are set correctly
+- Check database state matches expected state
+
+#### 2. Consumer Tests Fail
+
+**Problem**: Consumer tests fail to generate contracts
+
+**Solutions**:
+- Verify API is running and accessible
+- Check network connectivity between consumer and provider
+- Ensure all required fields are included in expectations
+- Check Pact configuration (host, port, etc.)
+
+#### 3. Database State Issues
+
+**Problem**: Tests fail due to unexpected database state
+
+**Solutions**:
+- Use the `/_pactSetup` endpoint to reset database state
+- Ensure state handlers are properly implemented
+- Check that database seeding works correctly
+- Verify database file permissions
+
+#### 4. Port Conflicts
+
+**Problem**: Tests fail due to port conflicts
+
+**Solutions**:
+- Use dynamic port allocation in provider tests
+- Ensure proper cleanup of test servers
+- Check for other services using the same ports
+
+### Debugging Tips
+
+1. **Enable Verbose Logging**:
+   ```typescript
+   logLevel: 'debug'
    ```
 
-2. **Docker Issues**
+2. **Check Pact Logs**:
    ```bash
-   # Restart Pact broker
-   docker stop pact-broker pact-broker-postgres
-   docker rm pact-broker pact-broker-postgres
-   ./pact-broker-setup.sh
+   tail -f logs/pact.log
    ```
 
-3. **Test Failures**
+3. **Verify Network Connectivity**:
    ```bash
-   # Check logs
-   cat logs/pact.log
-   
-   # Run with verbose output
-   npm run test:pact -- --verbose
+   curl http://localhost:3000/health
    ```
 
-### Debug Mode
+4. **Check Database State**:
+   ```bash
+   sqlite3 dog_breeds_test.db "SELECT * FROM dog_breeds;"
+   ```
 
-Enable debug logging by setting the log level:
+## 🔧 Advanced Configuration
+
+### Custom State Handlers
+
+You can add custom state handlers for specific test scenarios:
 
 ```typescript
-logLevel: 'debug' as const,
+app.post('/_pactSetup', express.json(), async (req, res) => {
+  const { state } = req.body;
+  
+  switch (state) {
+    case 'custom state':
+      // Custom state setup logic
+      break;
+    default:
+      // Handle unknown states
+  }
+  
+  res.sendStatus(200);
+});
 ```
 
-## 📚 Best Practices
+### Pact Broker Integration
+
+For production environments, configure Pact broker integration:
+
+```typescript
+export const brokerConfig = {
+  pactBroker: 'https://your-pact-broker.com',
+  pactBrokerUsername: process.env.PACT_BROKER_USERNAME,
+  pactBrokerPassword: process.env.PACT_BROKER_PASSWORD,
+  consumerVersion: process.env.npm_package_version,
+  tags: ['main', 'latest']
+};
+```
+
+## 📊 Monitoring and Reporting
+
+### Contract Health
+
+Monitor contract health through:
+
+1. **Pact Broker Dashboard** - Visual contract status
+2. **CI/CD Pipeline** - Automated verification results
+3. **Log Analysis** - Detailed test execution logs
+
+### Metrics
+
+Track key metrics:
+
+- Contract verification success rate
+- Test execution time
+- Number of contract changes
+- Integration health status
+
+## 🚀 Best Practices
 
 1. **Keep Contracts Simple** - Focus on essential interactions
-2. **Use Meaningful States** - Clear state names for test scenarios
-3. **Version Contracts** - Use semantic versioning for contracts
-4. **Monitor Changes** - Review contract changes in broker
-5. **Automate Testing** - Include Pact tests in CI/CD pipeline
+2. **Use Meaningful State Names** - Clear, descriptive state names
+3. **Test Error Scenarios** - Include error handling in contracts
+4. **Version Contracts** - Use semantic versioning for contracts
+5. **Automate Everything** - Integrate with CI/CD pipeline
+6. **Monitor Regularly** - Check contract health frequently
 
-## 🔗 Resources
+## 📚 Additional Resources
 
 - [Pact Documentation](https://docs.pact.io/)
-- [Pact Broker](https://docs.pact.io/pact_broker/)
-- [Contract Testing Guide](https://docs.pact.io/implementation_guides/contract_testing/)
-- [Best Practices](https://docs.pact.io/implementation_guides/best_practices/)
+- [Pact Broker Documentation](https://docs.pact.io/pact_broker)
+- [Pact JavaScript Examples](https://github.com/pact-foundation/pact-js)
+- [Contract Testing Best Practices](https://docs.pact.io/best_practices)
 
-## 🎉 Benefits
+---
 
-Contract testing with Pact provides:
-
-- **Early Detection** - Catch breaking changes before deployment
-- **Confidence** - Ensure consumer-provider compatibility
-- **Documentation** - Contracts serve as living documentation
-- **Speed** - Faster feedback than integration tests
-- **Reliability** - Reduce integration issues in production 
+**This Pact testing setup ensures reliable integration between the Dog Breeds API and Web Application, providing confidence in system compatibility and preventing integration issues.** 
