@@ -1,0 +1,151 @@
+# Page snapshot
+
+```yaml
+- banner:
+  - img
+  - heading "Dog Breeds Manager" [level=1]
+  - navigation:
+    - link "Breeds":
+      - /url: /
+      - img
+      - text: Breeds
+    - link "Search":
+      - /url: /search
+      - img
+      - text: Search
+    - link "Add Breed":
+      - /url: /breeds/new
+      - img
+      - text: Add Breed
+- main:
+  - heading "Dog Breeds" [level=1]
+  - paragraph: Discover and manage dog breeds
+  - link "Add Breed":
+    - /url: /breeds/new
+    - img
+    - text: Add Breed
+  - img
+  - textbox "Search breeds..."
+  - button "Search"
+  - link "View details for Edited Breed":
+    - /url: /breeds/598
+    - img "Edited Breed"
+  - link "Edited Breed":
+    - /url: /breeds/598
+    - heading "Edited Breed" [level=3]
+  - paragraph: Herding
+  - paragraph: The German Shepherd is a breed of medium to large-sized working dog that originated in Germany.
+  - text: Loyal 7-10 years Height:55-65 cm Weight:22-40 kg
+  - link "View details":
+    - /url: /breeds/598
+    - img
+  - link "Edit breed":
+    - /url: /breeds/598/edit
+    - img
+  - button "Delete breed":
+    - img
+  - link "View details for Golden Retriever":
+    - /url: /breeds/597
+    - img "Golden Retriever"
+  - link "Golden Retriever":
+    - /url: /breeds/597
+    - heading "Golden Retriever" [level=3]
+  - paragraph: Sporting
+  - paragraph: The Golden Retriever is a large-sized breed of dog bred as gun dogs to retrieve shot waterfowl.
+  - text: Friendly 10-12 years Height:55-61 cm Weight:25-34 kg
+  - link "View details":
+    - /url: /breeds/597
+    - img
+  - link "Edit breed":
+    - /url: /breeds/597/edit
+    - img
+  - button "Delete breed":
+    - img
+  - link "View details for Labrador Retriever":
+    - /url: /breeds/596
+    - img "Labrador Retriever"
+  - link "Labrador Retriever":
+    - /url: /breeds/596
+    - heading "Labrador Retriever" [level=3]
+  - paragraph: Sporting
+  - paragraph: The Labrador Retriever is a medium-large breed of retriever-gun dog.
+  - text: Friendly 10-12 years Height:55-62 cm Weight:25-36 kg
+  - link "View details":
+    - /url: /breeds/596
+    - img
+  - link "Edit breed":
+    - /url: /breeds/596/edit
+    - img
+  - button "Delete breed":
+    - img
+  - link "View details for Playwright Test Breed 1751406071433-0.8127682898753636":
+    - /url: /breeds/599
+    - img "Playwright Test Breed 1751406071433-0.8127682898753636"
+  - link "Playwright Test Breed 1751406071433-0.8127682898753636":
+    - /url: /breeds/599
+    - heading "Playwright Test Breed 1751406071433-0.8127682898753636" [level=3]
+  - paragraph: Sporting
+  - paragraph: A breed created by Playwright test.
+  - text: Friendly 10-12 years Height:30-40 cm Weight:10-20 kg
+  - link "View details":
+    - /url: /breeds/599
+    - img
+  - link "Edit breed":
+    - /url: /breeds/599/edit
+    - img
+  - button "Delete breed":
+    - img
+  - link "View details for Playwright Test Breed 1751406071453-0.6141574312051845":
+    - /url: /breeds/600
+    - img "Playwright Test Breed 1751406071453-0.6141574312051845"
+  - link "Playwright Test Breed 1751406071453-0.6141574312051845":
+    - /url: /breeds/600
+    - heading "Playwright Test Breed 1751406071453-0.6141574312051845" [level=3]
+  - paragraph: Sporting
+  - paragraph: A breed created by Playwright test.
+  - text: Friendly 10-12 years Height:30-40 cm Weight:10-20 kg
+  - link "View details":
+    - /url: /breeds/600
+    - img
+  - link "Edit breed":
+    - /url: /breeds/600/edit
+    - img
+  - button "Delete breed":
+    - img
+  - link "View details for Playwright Test Breed 1751406072117-0.4689442857321928":
+    - /url: /breeds/601
+    - img "Playwright Test Breed 1751406072117-0.4689442857321928"
+  - link "Playwright Test Breed 1751406072117-0.4689442857321928":
+    - /url: /breeds/601
+    - heading "Playwright Test Breed 1751406072117-0.4689442857321928" [level=3]
+  - paragraph: Sporting
+  - paragraph: A breed created by Playwright test.
+  - text: Friendly 10-12 years Height:30-40 cm Weight:10-20 kg
+  - link "View details":
+    - /url: /breeds/601
+    - img
+  - link "Edit breed":
+    - /url: /breeds/601/edit
+    - img
+  - button "Delete breed":
+    - img
+  - link "View details for Playwright Test Breed 1751406072224-0.3182683566909166":
+    - /url: /breeds/602
+    - img "Playwright Test Breed 1751406072224-0.3182683566909166"
+  - link "Playwright Test Breed 1751406072224-0.3182683566909166":
+    - /url: /breeds/602
+    - heading "Playwright Test Breed 1751406072224-0.3182683566909166" [level=3]
+  - paragraph: Sporting
+  - paragraph: A breed created by Playwright test.
+  - text: Friendly 10-12 years Height:30-40 cm Weight:10-20 kg
+  - link "View details":
+    - /url: /breeds/602
+    - img
+  - link "Edit breed":
+    - /url: /breeds/602/edit
+    - img
+  - button "Delete breed":
+    - img
+- contentinfo:
+  - paragraph: © 2024 Dog Breeds Manager. Built with React, TypeScript, and Tailwind CSS.
+```
