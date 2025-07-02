@@ -18,7 +18,10 @@
     "pact:publish": "pact-broker publish pacts --consumer-app-version=$npm_package_version --broker-base-url=http://localhost:9292",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "test:all": "npm run test:unit && npm run test:pact && cd web-app && npx playwright test"
+    "test:all": "npm run test:unit && npm run test:pact && cd web-app && npx playwright test",
+    "docs:generate": "node scripts/generate-openapi.js",
+    "docs:serve": "npm run docs:generate && npm run dev",
+    "docs:build": "npm run build && npm run docs:generate"
   },
   "keywords": [
     "dog",
@@ -32,12 +35,16 @@
   "license": "MIT",
   "dependencies": {
     "@types/morgan": "^1.9.10",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "express-validator": "^7.0.1",
     "helmet": "^7.1.0",
     "morgan": "^1.10.0",
-    "sqlite3": "^5.1.6"
+    "sqlite3": "^5.1.6",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@pact-foundation/pact": "^10.4.0",

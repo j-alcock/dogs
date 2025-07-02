@@ -1,137 +1,72 @@
-# Pact Contract Testing for Dog Breeds System
+# Pact Contract Testing
 
-This document describes the Pact contract testing setup for the Dog Breeds API and Web Application, including CI/CD integration and troubleshooting.
+This document provides comprehensive information about Pact contract testing implementation in the Dog Breeds System.
 
-## 🎯 Overview
+## Overview
 
-Pact is a contract testing tool that ensures the consumer (web app) and provider (API) maintain compatibility. It works by:
+Pact ensures API compatibility between the web app (consumer) and API (provider) by generating and verifying contracts that define the expected interactions between services.
 
-1. **Consumer Tests**: The web app defines its expectations of the API
-2. **Contract Generation**: Pact generates contracts based on these expectations
-3. **Provider Verification**: The API verifies it meets these contracts
-4. **Contract Broker**: Contracts are stored and shared via a Pact broker
-
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web App       │    │   Pact Broker   │    │   API           │
-│   (Consumer)    │───▶│   (Contracts)   │───▶│   (Provider)    │
+│   Web App       │    │   Pact Broker   │    │   API Server    │
+│   (Consumer)    │───▶│   (Optional)    │───▶│   (Provider)    │
+│                 │    │                 │    │                 │
+│ - Generates     │    │ - Stores        │    │ - Verifies      │
+│   contracts     │    │   contracts     │    │   contracts     │
+│ - Tests API     │    │ - Manages       │    │ - Runs provider │
+│   interactions  │    │   versions      │    │   verification  │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 📁 File Structure
-
-```
-dogs/
-├── src/pact/
-│   ├── consumer/
-│   │   └── dogBreedsApi.consumer.test.ts    # Consumer contract tests
-│   └── provider/
-│       └── dogBreedsApi.provider.test.ts    # Provider verification tests
-├── pacts/                                    # Generated contracts
-├── logs/                                     # Pact logs
-├── pact-broker-setup.sh                      # Broker setup script
-└── PACT_TESTING.md                          # This file
-
-web-app/
-├── src/pact/
-│   └── consumer/
-│       └── dogBreedsApi.consumer.test.ts    # Consumer contract tests
-├── pacts/                                    # Generated contracts
-└── logs/                                     # Pact logs
-```
-
-## 🚀 Quick Start
+## Setup
 
 ### 1. Install Dependencies
 
+**Backend (Provider):**
 ```bash
-# Backend dependencies
-cd dogs
-npm install
+npm install --save-dev @pact-foundation/pact
+```
 
-# Frontend dependencies
+**Frontend (Consumer):**
+```bash
 cd web-app
-npm install
+npm install --save-dev @pact-foundation/pact
 ```
 
-### 2. Start Pact Broker (Optional)
+### 2. Pact Broker Setup (Optional)
+
+Create a local Pact Broker for contract management:
 
 ```bash
-cd dogs
-./pact-broker-setup.sh
+# Create pact-broker-setup.sh
+#!/bin/bash
+docker run -d --name pact-broker \
+  -p 9292:9292 \
+  -e PACT_BROKER_DATABASE_URL=postgres://pact:password@localhost/pact_broker \
+  -e PACT_BROKER_DATABASE_ADAPTER=postgres \
+  -e PACT_BROKER_BASIC_AUTH_USERNAME=pact \
+  -e PACT_BROKER_BASIC_AUTH_PASSWORD=pact \
+  pactfoundation/pact-broker:latest
+
+# Make executable
+chmod +x pact-broker-setup.sh
 ```
 
-This will start a local Pact broker at http://localhost:9292
+**Pact Broker Access:**
+- **URL**: http://localhost:9292
+- **Username**: pact
+- **Password**: pact
 
-### 3. Run Consumer Tests (Generate Contracts)
+## Configuration
 
-```bash
-# From the web-app directory
-cd web-app
-npm run test:pact:consumer
-```
-
-This generates contracts based on the web app's expectations.
-
-### 4. Run Provider Tests (Verify Contracts)
-
-```bash
-# From the dogs directory
-cd dogs
-npm run test:pact:provider
-```
-
-This verifies the API meets the consumer contracts.
-
-## 📋 Available Scripts
-
-### Backend (dogs/)
-
-| Script | Description |
-|--------|-------------|
-| `npm run test:pact` | Run all Pact tests |
-| `npm run test:pact:consumer` | Run consumer contract tests |
-| `npm run test:pact:provider` | Run provider verification tests |
-| `npm run pact:publish` | Publish contracts to broker |
-
-### Frontend (web-app/)
-
-| Script | Description |
-|--------|-------------|
-| `npm run test:pact` | Run all Pact tests |
-| `npm run test:pact:consumer` | Run consumer contract tests |
-| `npm run pact:publish` | Publish contracts to broker |
-
-## 🧪 Test Coverage
-
-### Consumer Tests (Web App Expectations)
-
-The consumer tests verify that the web app correctly handles:
-
-1. **GET /api/breeds** - List breeds with pagination
-2. **GET /api/breeds/search** - Search breeds by query
-3. **GET /api/breeds/:id** - Get specific breed by ID
-4. **POST /api/breeds** - Create new breed
-5. **PUT /api/breeds/:id** - Update existing breed
-6. **DELETE /api/breeds/:id** - Delete breed
-7. **GET /health** - Health check endpoint
-
-### Provider Tests (API Verification)
-
-The provider tests verify that the API:
-
-1. **Meets Contract Expectations** - All endpoints match consumer expectations
-2. **Handles State Changes** - Proper state management for different scenarios
-3. **Returns Correct Data** - Response format and content match contracts
-4. **Error Handling** - Proper error responses for edge cases
-
-## 🔧 Configuration
-
-### Pact Configuration
+### Consumer Configuration (Web App)
 
 ```typescript
+// web-app/src/pact/pactConfig.ts
+import path from 'path';
+
 export const pactConfig = {
   consumer: 'DogBreedsWebApp',
   provider: 'DogBreedsAPI',
@@ -142,194 +77,688 @@ export const pactConfig = {
   cors: true,
   host: '127.0.0.1',
   port: 1234,
+  dir: path.resolve(process.cwd(), 'pacts'),
+  pactFilesOrDirs: [path.resolve(process.cwd(), 'pacts')],
+  pactBroker: 'http://localhost:9292',
+  pactBrokerUsername: 'pact',
+  pactBrokerPassword: 'pact',
+  publishVerificationResult: true,
+  providerVersion: '1.0.0',
+  consumerVersion: '1.0.0',
 };
 ```
 
-### State Handlers
-
-The provider tests include state handlers for different scenarios:
-
-- `has breeds in database` - Ensures breeds exist for testing
-- `has breed with id 1` - Ensures specific breed exists
-- `breed does not exist` - Ensures breed doesn't exist (for 404 tests)
-- `database is empty` - Clears database for creation tests
-- `reset to seed` - Resets database to initial state
-- `API is running` - Ensures API is healthy
-
-## 🌐 Pact Broker
-
-The Pact broker provides a web interface to:
-
-- **View Contracts** - See all generated contracts
-- **Track Versions** - Monitor contract changes over time
-- **Verify Compatibility** - Check consumer-provider compatibility
-- **Integration Status** - View integration health
-
-### Access
-
-- **URL**: http://localhost:9292
-- **Username**: pact
-- **Password**: pact
-
-## 🔄 Workflow
-
-### Development Workflow
-
-1. **Make Changes** - Modify API or web app
-2. **Run Consumer Tests** - Generate new contracts
-3. **Run Provider Tests** - Verify API meets contracts
-4. **Publish Contracts** - Share contracts via broker
-5. **Verify Integration** - Check compatibility in broker
-
-### CI/CD Integration
-
-The project includes GitHub Actions workflow that automatically:
-
-```yaml
-# GitHub Actions workflow (.github/workflows/ci.yml)
-- name: Run Pact contract tests
-  run: npm run test:pact
-
-- name: Run Pact provider verification
-  run: npm run test:pact:provider
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### 1. Provider Verification Fails
-
-**Problem**: Provider tests fail with 404 errors or body mismatches
-
-**Solutions**:
-- Ensure the provider server is running on the correct port
-- Check that all required endpoints are implemented
-- Verify Content-Type headers are set correctly
-- Check database state matches expected state
-
-#### 2. Consumer Tests Fail
-
-**Problem**: Consumer tests fail to generate contracts
-
-**Solutions**:
-- Verify API is running and accessible
-- Check network connectivity between consumer and provider
-- Ensure all required fields are included in expectations
-- Check Pact configuration (host, port, etc.)
-
-#### 3. Database State Issues
-
-**Problem**: Tests fail due to unexpected database state
-
-**Solutions**:
-- Use the `/_pactSetup` endpoint to reset database state
-- Ensure state handlers are properly implemented
-- Check that database seeding works correctly
-- Verify database file permissions
-
-#### 4. Port Conflicts
-
-**Problem**: Tests fail due to port conflicts
-
-**Solutions**:
-- Use dynamic port allocation in provider tests
-- Ensure proper cleanup of test servers
-- Check for other services using the same ports
-
-### Debugging Tips
-
-1. **Enable Verbose Logging**:
-   ```typescript
-   logLevel: 'debug'
-   ```
-
-2. **Check Pact Logs**:
-   ```bash
-   tail -f logs/pact.log
-   ```
-
-3. **Verify Network Connectivity**:
-   ```bash
-   curl http://localhost:3000/health
-   ```
-
-4. **Check Database State**:
-   ```bash
-   sqlite3 dog_breeds_test.db "SELECT * FROM dog_breeds;"
-   ```
-
-## 🔧 Advanced Configuration
-
-### Custom State Handlers
-
-You can add custom state handlers for specific test scenarios:
+### Provider Configuration (API Server)
 
 ```typescript
-app.post('/_pactSetup', express.json(), async (req, res) => {
-  const { state } = req.body;
-  
-  switch (state) {
-    case 'custom state':
-      // Custom state setup logic
-      break;
-    default:
-      // Handle unknown states
-  }
-  
-  res.sendStatus(200);
+// src/pact/providerConfig.ts
+import path from 'path';
+
+export const providerConfig = {
+  provider: 'DogBreedsAPI',
+  pactBrokerUrl: 'http://localhost:9292',
+  pactBrokerUsername: 'pact',
+  pactBrokerPassword: 'pact',
+  publishVerificationResult: true,
+  providerVersion: '1.0.0',
+  pactFilesOrDirs: [path.resolve(process.cwd(), 'pacts')],
+  stateHandlers: {
+    'has breeds in database': () => {
+      // Setup: Ensure breeds exist
+      return Promise.resolve();
+    },
+    'has breed with id 1': () => {
+      // Setup: Ensure specific breed exists
+      return Promise.resolve();
+    },
+    'breed does not exist': () => {
+      // Setup: Ensure breed doesn't exist
+      return Promise.resolve();
+    },
+    'database is empty': () => {
+      // Setup: Clear database
+      return Promise.resolve();
+    },
+    'API is running': () => {
+      // Setup: Ensure API is healthy
+      return Promise.resolve();
+    },
+  },
+  requestFilter: (req: any, res: any, next: any) => {
+    // Optional: Modify requests during verification
+    next();
+  },
+  responseFilter: (res: any) => {
+    // Optional: Modify responses during verification
+    return res;
+  },
+};
+```
+
+## Consumer Tests
+
+### Test Structure
+
+```typescript
+// web-app/src/pact/consumer/dogBreedsApi.consumer.test.ts
+import { Pact } from '@pact-foundation/pact';
+import { pactConfig } from '../pactConfig';
+import { api } from '../../services/api';
+
+describe('Dog Breeds API Consumer', () => {
+  const provider = new Pact(pactConfig);
+
+  beforeAll(async () => {
+    await provider.setup();
+  });
+
+  afterEach(async () => {
+    await provider.verify();
+  });
+
+  afterAll(async () => {
+    await provider.finalize();
+  });
+
+  describe('GET /api/breeds', () => {
+    it('should return breeds with pagination', async () => {
+      const expectedResponse = {
+        success: true,
+        data: [
+          {
+            id: 1,
+            name: 'Golden Retriever',
+            breed_group: 'Sporting',
+            temperament: 'Intelligent, Friendly, Devoted',
+            life_span: '10-12 years',
+            height_cm: { min: 55, max: 61 },
+            weight_kg: { min: 25, max: 34 },
+            description: 'The Golden Retriever is a large-sized breed of dog.'
+          }
+        ],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1
+        },
+        message: 'Breeds retrieved successfully'
+      };
+
+      await provider.addInteraction({
+        state: 'has breeds in database',
+        uponReceiving: 'a request for breeds with pagination',
+        withRequest: {
+          method: 'GET',
+          path: '/api/breeds',
+          query: {
+            page: '1',
+            limit: '10'
+          },
+          headers: {
+            'Accept': 'application/json'
+          }
+        },
+        willRespondWith: {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: expectedResponse
+        }
+      });
+
+      const response = await api.getBreeds({ page: 1, limit: 10 });
+      expect(response).toEqual(expectedResponse);
+    });
+  });
+
+  describe('GET /api/breeds/:id', () => {
+    it('should return a specific breed', async () => {
+      const expectedBreed = {
+        id: 1,
+        name: 'Golden Retriever',
+        breed_group: 'Sporting',
+        temperament: 'Intelligent, Friendly, Devoted',
+        life_span: '10-12 years',
+        height_cm: { min: 55, max: 61 },
+        weight_kg: { min: 25, max: 34 },
+        description: 'The Golden Retriever is a large-sized breed of dog.'
+      };
+
+      await provider.addInteraction({
+        state: 'has breed with id 1',
+        uponReceiving: 'a request for breed with id 1',
+        withRequest: {
+          method: 'GET',
+          path: '/api/breeds/1',
+          headers: {
+            'Accept': 'application/json'
+          }
+        },
+        willRespondWith: {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            success: true,
+            data: expectedBreed,
+            message: 'Breed retrieved successfully'
+          }
+        }
+      });
+
+      const response = await api.getBreedById(1);
+      expect(response.data).toEqual(expectedBreed);
+    });
+
+    it('should return 404 for non-existent breed', async () => {
+      await provider.addInteraction({
+        state: 'breed does not exist',
+        uponReceiving: 'a request for non-existent breed',
+        withRequest: {
+          method: 'GET',
+          path: '/api/breeds/999',
+          headers: {
+            'Accept': 'application/json'
+          }
+        },
+        willRespondWith: {
+          status: 404,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            success: false,
+            message: 'Breed not found',
+            error: 'Breed with ID 999 not found'
+          }
+        }
+      });
+
+      await expect(api.getBreedById(999)).rejects.toThrow();
+    });
+  });
+
+  describe('POST /api/breeds', () => {
+    it('should create a new breed', async () => {
+      const newBreed = {
+        name: 'Border Collie',
+        breed_group: 'Herding',
+        temperament: 'Intelligent, Energetic, Responsive',
+        life_span: '12-15 years',
+        height_cm: { min: 46, max: 56 },
+        weight_kg: { min: 14, max: 20 },
+        description: 'The Border Collie is a working and herding dog breed.'
+      };
+
+      const expectedResponse = {
+        success: true,
+        data: {
+          id: 2,
+          ...newBreed
+        },
+        message: 'Breed created successfully'
+      };
+
+      await provider.addInteraction({
+        state: 'database is empty',
+        uponReceiving: 'a request to create a new breed',
+        withRequest: {
+          method: 'POST',
+          path: '/api/breeds',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: newBreed
+        },
+        willRespondWith: {
+          status: 201,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: expectedResponse
+        }
+      });
+
+      const response = await api.createBreed(newBreed);
+      expect(response).toEqual(expectedResponse);
+    });
+  });
+
+  describe('PUT /api/breeds/:id', () => {
+    it('should update an existing breed', async () => {
+      const updatedBreed = {
+        name: 'Golden Retriever Updated',
+        breed_group: 'Sporting',
+        temperament: 'Intelligent, Friendly, Devoted, Loyal',
+        life_span: '10-12 years',
+        height_cm: { min: 55, max: 61 },
+        weight_kg: { min: 25, max: 34 },
+        description: 'The Golden Retriever is a large-sized breed of dog.'
+      };
+
+      const expectedResponse = {
+        success: true,
+        data: {
+          id: 1,
+          ...updatedBreed
+        },
+        message: 'Breed updated successfully'
+      };
+
+      await provider.addInteraction({
+        state: 'has breed with id 1',
+        uponReceiving: 'a request to update breed with id 1',
+        withRequest: {
+          method: 'PUT',
+          path: '/api/breeds/1',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: updatedBreed
+        },
+        willRespondWith: {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: expectedResponse
+        }
+      });
+
+      const response = await api.updateBreed(1, updatedBreed);
+      expect(response).toEqual(expectedResponse);
+    });
+  });
+
+  describe('DELETE /api/breeds/:id', () => {
+    it('should delete an existing breed', async () => {
+      await provider.addInteraction({
+        state: 'has breed with id 1',
+        uponReceiving: 'a request to delete breed with id 1',
+        withRequest: {
+          method: 'DELETE',
+          path: '/api/breeds/1',
+          headers: {
+            'Accept': 'application/json'
+          }
+        },
+        willRespondWith: {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            success: true,
+            message: 'Breed deleted successfully'
+          }
+        }
+      });
+
+      const response = await api.deleteBreed(1);
+      expect(response.success).toBe(true);
+    });
+  });
+
+  describe('GET /api/breeds/search', () => {
+    it('should search breeds by query', async () => {
+      const searchResults = [
+        {
+          id: 1,
+          name: 'Golden Retriever',
+          breed_group: 'Sporting',
+          temperament: 'Intelligent, Friendly, Devoted',
+          life_span: '10-12 years',
+          height_cm: { min: 55, max: 61 },
+          weight_kg: { min: 25, max: 34 },
+          description: 'The Golden Retriever is a large-sized breed of dog.'
+        }
+      ];
+
+      await provider.addInteraction({
+        state: 'has breeds in database',
+        uponReceiving: 'a search request for golden',
+        withRequest: {
+          method: 'GET',
+          path: '/api/breeds/search',
+          query: {
+            q: 'golden'
+          },
+          headers: {
+            'Accept': 'application/json'
+          }
+        },
+        willRespondWith: {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: {
+            success: true,
+            data: searchResults,
+            message: 'Search completed successfully'
+          }
+        }
+      });
+
+      const response = await api.searchBreeds('golden');
+      expect(response.data).toEqual(searchResults);
+    });
+  });
 });
 ```
 
-### Pact Broker Integration
+## Provider Tests
 
-For production environments, configure Pact broker integration:
+### Test Structure
 
 ```typescript
-export const brokerConfig = {
-  pactBroker: 'https://your-pact-broker.com',
-  pactBrokerUsername: process.env.PACT_BROKER_USERNAME,
-  pactBrokerPassword: process.env.PACT_BROKER_PASSWORD,
-  consumerVersion: process.env.npm_package_version,
-  tags: ['main', 'latest']
+// src/pact/provider/dogBreedsApi.provider.test.ts
+import { Verifier } from '@pact-foundation/pact';
+import { providerConfig } from '../providerConfig';
+import { app } from '../../index';
+import { DatabaseService } from '../../database';
+
+describe('Dog Breeds API Provider', () => {
+  const verifier = new Verifier(providerConfig);
+
+  beforeAll(async () => {
+    // Start the API server
+    await new Promise((resolve) => {
+      const server = app.listen(3000, () => {
+        console.log('Provider server started on port 3000');
+        resolve(server);
+      });
+    });
+  });
+
+  it('should verify the consumer contract', async () => {
+    const result = await verifier.verifyProvider();
+    expect(result).toBe(true);
+  });
+
+  afterAll(async () => {
+    // Cleanup
+    await DatabaseService.close();
+  });
+});
+```
+
+## State Handlers
+
+### Implementation
+
+```typescript
+// src/pact/stateHandlers.ts
+import { DatabaseService } from '../database';
+import { DogBreed } from '../types';
+
+export const stateHandlers = {
+  'has breeds in database': async () => {
+    const breeds: DogBreed[] = [
+      {
+        id: 1,
+        name: 'Golden Retriever',
+        breed_group: 'Sporting',
+        temperament: 'Intelligent, Friendly, Devoted',
+        life_span: '10-12 years',
+        height_cm: { min: 55, max: 61 },
+        weight_kg: { min: 25, max: 34 },
+        description: 'The Golden Retriever is a large-sized breed of dog.'
+      },
+      {
+        id: 2,
+        name: 'German Shepherd',
+        breed_group: 'Herding',
+        temperament: 'Intelligent, Confident, Courageous',
+        life_span: '7-10 years',
+        height_cm: { min: 55, max: 65 },
+        weight_kg: { min: 22, max: 40 },
+        description: 'The German Shepherd is a medium to large-sized working dog.'
+      }
+    ];
+
+    await DatabaseService.clearBreeds();
+    for (const breed of breeds) {
+      await DatabaseService.createBreed(breed);
+    }
+  },
+
+  'has breed with id 1': async () => {
+    const breed: DogBreed = {
+      id: 1,
+      name: 'Golden Retriever',
+      breed_group: 'Sporting',
+      temperament: 'Intelligent, Friendly, Devoted',
+      life_span: '10-12 years',
+      height_cm: { min: 55, max: 61 },
+      weight_kg: { min: 25, max: 34 },
+      description: 'The Golden Retriever is a large-sized breed of dog.'
+    };
+
+    await DatabaseService.clearBreeds();
+    await DatabaseService.createBreed(breed);
+  },
+
+  'breed does not exist': async () => {
+    await DatabaseService.clearBreeds();
+  },
+
+  'database is empty': async () => {
+    await DatabaseService.clearBreeds();
+  },
+
+  'API is running': async () => {
+    // Verify API is healthy
+    const response = await fetch('http://localhost:3000/health');
+    if (!response.ok) {
+      throw new Error('API is not running');
+    }
+  }
 };
 ```
 
-## 📊 Monitoring and Reporting
+## Running Tests
 
-### Contract Health
+### Consumer Tests (Generate Contracts)
 
-Monitor contract health through:
+```bash
+# Run consumer tests to generate contracts
+cd web-app
+npm run test:pact:consumer
 
-1. **Pact Broker Dashboard** - Visual contract status
-2. **CI/CD Pipeline** - Automated verification results
-3. **Log Analysis** - Detailed test execution logs
+# This will:
+# 1. Start the Pact mock server
+# 2. Run consumer tests against the mock
+# 3. Generate contract files in pacts/ directory
+# 4. Optionally publish to Pact Broker
+```
 
-### Metrics
+### Provider Tests (Verify Contracts)
 
-Track key metrics:
+```bash
+# Run provider tests to verify contracts
+npm run test:pact:provider
 
-- Contract verification success rate
-- Test execution time
-- Number of contract changes
-- Integration health status
+# This will:
+# 1. Start the actual API server
+# 2. Load contract files from pacts/ directory
+# 3. Send requests to the API server
+# 4. Verify responses match contracts
+# 5. Report verification results
+```
 
-## 🚀 Best Practices
+### Complete Pact Workflow
 
-1. **Keep Contracts Simple** - Focus on essential interactions
-2. **Use Meaningful State Names** - Clear, descriptive state names
-3. **Test Error Scenarios** - Include error handling in contracts
-4. **Version Contracts** - Use semantic versioning for contracts
-5. **Automate Everything** - Integrate with CI/CD pipeline
-6. **Monitor Regularly** - Check contract health frequently
+```bash
+# 1. Setup Pact Broker (optional)
+./pact-broker-setup.sh
 
-## 📚 Additional Resources
+# 2. Generate contracts (consumer)
+cd web-app && npm run test:pact:consumer
 
-- [Pact Documentation](https://docs.pact.io/)
-- [Pact Broker Documentation](https://docs.pact.io/pact_broker)
-- [Pact JavaScript Examples](https://github.com/pact-foundation/pact-js)
-- [Contract Testing Best Practices](https://docs.pact.io/best_practices)
+# 3. Verify contracts (provider)
+npm run test:pact:provider
 
----
+# 4. View results in Pact Broker
+open http://localhost:9292
+```
 
-**This Pact testing setup ensures reliable integration between the Dog Breeds API and Web Application, providing confidence in system compatibility and preventing integration issues.** 
+## Package.json Scripts
+
+### Consumer (Web App)
+
+```json
+{
+  "scripts": {
+    "test:pact:consumer": "jest --testPathPattern=pact/consumer --testTimeout=30000",
+    "test:pact:consumer:watch": "jest --testPathPattern=pact/consumer --watch --testTimeout=30000",
+    "pact:publish": "pact-broker publish pacts/ --consumer-app-version=1.0.0 --broker-base-url=http://localhost:9292 --broker-username=pact --broker-password=pact"
+  }
+}
+```
+
+### Provider (API Server)
+
+```json
+{
+  "scripts": {
+    "test:pact:provider": "jest --testPathPattern=pact/provider --testTimeout=30000",
+    "test:pact:provider:watch": "jest --testPathPattern=pact/provider --watch --testTimeout=30000",
+    "pact:verify": "pact-provider-verifier --provider-base-url=http://localhost:3000 --pact-broker-base-url=http://localhost:9292 --provider-app-version=1.0.0 --broker-username=pact --broker-password=pact"
+  }
+}
+```
+
+## Best Practices
+
+### 1. Contract Design
+
+- **Be specific about expectations**: Define exact request/response formats
+- **Include edge cases**: Test error scenarios and boundary conditions
+- **Use meaningful state names**: Make state handlers descriptive
+- **Version contracts**: Use semantic versioning for contract changes
+
+### 2. Test Organization
+
+- **Group by endpoint**: Organize tests by API endpoint
+- **Use descriptive test names**: Make test intentions clear
+- **Include setup/teardown**: Ensure clean state between tests
+- **Handle async operations**: Use proper async/await patterns
+
+### 3. State Management
+
+- **Keep states simple**: Each state should have a single responsibility
+- **Use database transactions**: Ensure atomic state changes
+- **Clean up after tests**: Reset state to avoid test interference
+- **Document state purposes**: Comment on what each state does
+
+### 4. Error Handling
+
+- **Test error scenarios**: Include 404, 400, 500 responses
+- **Validate error formats**: Ensure error responses match contracts
+- **Handle timeouts**: Set appropriate timeouts for slow operations
+- **Log failures**: Include detailed logging for debugging
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Port conflicts**: Ensure Pact mock server port is available
+2. **State handler failures**: Check database connectivity and permissions
+3. **Contract mismatches**: Verify request/response formats match exactly
+4. **Timeout errors**: Increase test timeouts for slow operations
+5. **CORS issues**: Configure CORS properly for cross-origin requests
+
+### Debug Commands
+
+```bash
+# Check Pact Broker status
+curl -u pact:pact http://localhost:9292/diagnostic/status
+
+# View contract files
+ls -la pacts/
+
+# Check provider logs
+npm run test:pact:provider -- --verbose
+
+# Verify specific contract
+pact-provider-verifier --provider-base-url=http://localhost:3000 --pact-urls=pacts/dogbreedswebapp-dogbreedsapi.json
+```
+
+## Integration with CI/CD
+
+### GitHub Actions Example
+
+```yaml
+# .github/workflows/pact.yml
+name: Pact Contract Testing
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  pact:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: pact_broker
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      pact-broker:
+        image: pactfoundation/pact-broker:latest
+        env:
+          PACT_BROKER_DATABASE_URL: postgres://postgres:password@localhost/pact_broker
+          PACT_BROKER_DATABASE_ADAPTER: postgres
+          PACT_BROKER_BASIC_AUTH_USERNAME: pact
+          PACT_BROKER_BASIC_AUTH_PASSWORD: pact
+        ports:
+          - 9292:9292
+        depends_on:
+          postgres:
+            condition: service_healthy
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd web-app && npm ci
+    
+    - name: Run consumer tests
+      run: |
+        cd web-app
+        npm run test:pact:consumer
+    
+    - name: Publish contracts
+      run: |
+        cd web-app
+        npm run pact:publish
+    
+    - name: Run provider tests
+      run: npm run test:pact:provider
+```
+
+This comprehensive Pact testing setup ensures reliable contract testing between the consumer (web app) and provider (API server), maintaining API compatibility and preventing breaking changes. 

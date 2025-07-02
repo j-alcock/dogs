@@ -2,10 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
 import { DatabaseService } from './database';
 import { BreedController } from './controllers/breedController';
 import { createBreedRoutes } from './routes/breedRoutes';
 import { ApiResponse } from './types';
+import { specs } from './swagger';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,14 +24,30 @@ const dbService = new DatabaseService(dbConfig);
 // Initialize controller
 const breedController = new BreedController(dbService);
 
-// Middleware
-app.use(helmet()); // Security headers
+// Middleware - Disable CSP for Swagger UI compatibility
+app.use(helmet({
+  contentSecurityPolicy: false,
+})); // Security headers without CSP to avoid Swagger UI issues
 app.use(cors()); // Enable CORS
 app.use(morgan('combined')); // Logging
 app.use(express.json({ limit: '10mb' })); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
-// Health check endpoint
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: Check if the API is running and healthy
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/HealthResponse'
+ */
 app.get('/health', (req, res) => {
   const response: ApiResponse<{ status: string; timestamp: string }> = {
     success: true,
@@ -41,6 +59,26 @@ app.get('/health', (req, res) => {
   };
   res.status(200).json(response);
 });
+
+// Serve OpenAPI specification as JSON
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.json(specs);
+});
+
+// Swagger documentation with proper configuration
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Dog Breeds API Documentation',
+  customfavIcon: '/favicon.ico',
+  swaggerOptions: {
+    docExpansion: 'list',
+    filter: true,
+    showRequestHeaders: true,
+    tryItOutEnabled: true,
+  },
+}));
 
 // API routes
 app.use('/api/breeds', createBreedRoutes(breedController));
@@ -88,7 +126,46 @@ app.post('/_pactSetup', express.json(), async (req, res) => {
   }
 });
 
-// Root endpoint
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: API information
+ *     description: Get information about the API and available endpoints
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         name:
+ *                           type: string
+ *                           example: Dog Breeds API
+ *                         version:
+ *                           type: string
+ *                           example: '1.0.0'
+ *                         description:
+ *                           type: string
+ *                           example: A TypeScript API for managing dog breeds with CRUD operations
+ *                         endpoints:
+ *                           type: array
+ *                           items:
+ *                             type: string
+ *                           example:
+ *                             - GET /api/breeds - Get all breeds (with pagination)
+ *                             - GET /api/breeds/search?q=query - Search breeds
+ *                     message:
+ *                       type: string
+ *                       example: Welcome to the Dog Breeds API!
+ */
 app.get('/', (req, res) => {
   const response: ApiResponse<{
     name: string;
@@ -153,7 +230,7 @@ process.on('SIGTERM', () => {
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Dog Breeds API server running at http://${HOST}:${PORT}`);
-  console.log(`📚 API Documentation available at http://${HOST}:${PORT}`);
+  console.log(`📚 API Documentation available at http://${HOST}:${PORT}/api-docs`);
   console.log(`🏥 Health check available at http://${HOST}:${PORT}/health`);
 });
 

@@ -1,26 +1,29 @@
 # Dog Breeds System
 
-A complete, full-stack web application for managing dog breeds, featuring a TypeScript/Express.js backend API and a modern React frontend with comprehensive testing and CI/CD pipeline.
+A complete, full-stack web application for managing dog breeds, featuring a TypeScript/Express.js backend API and a modern React frontend with comprehensive testing.
 
-## 🎯 **Project Overview**
+## 📋 Table of Contents
 
-This is a production-ready dog breeds management system with:
+- [Installation](#installation)
+- [API](#api)
+- [Swagger Documentation](#swagger-documentation)
+- [Frontend](#frontend)
+- [Testing](#testing)
+  - [Unit Tests](#unit-tests)
+  - [Integration Tests](#integration-tests)
+  - [Functional Tests](#functional-tests)
+  - [Contract Tests](#contract-tests)
+  - [UI Tests](#ui-tests)
+- [CI/CD](#cicd)
+- [Contributing](#contributing)
 
-- **Backend API** (Port 3000): TypeScript Express.js REST API with SQLite database
-- **Frontend Web App** (Port 3001): Modern React 18 application with Tailwind CSS
-- **Contract Testing**: Pact integration for API compatibility
-- **E2E Testing**: Playwright tests for full user workflows
-- **CI/CD Pipeline**: GitHub Actions for automated testing and deployment
-- **Comprehensive Documentation**: Complete API and system documentation
-
-## 🚀 **Quick Start**
+## 🚀 Installation
 
 ### Prerequisites
-
 - Node.js (v18 or higher)
 - npm or yarn
 
-### Installation & Setup
+### Setup
 
 1. **Clone and navigate to the project:**
    ```bash
@@ -28,243 +31,405 @@ This is a production-ready dog breeds management system with:
    cd dogs
    ```
 
-2. **Install backend dependencies:**
+2. **Install dependencies:**
    ```bash
    npm install
+   cd web-app && npm install && cd ..
    ```
 
-3. **Install frontend dependencies:**
-   ```bash
-   cd web-app
-   npm install
-   cd ..
-   ```
-
-4. **Start the complete system:**
+3. **Start the system:**
    ```bash
    # Terminal 1: Start backend API
    npm run dev
    
    # Terminal 2: Start frontend web app
-   cd web-app
-   npm run dev
+   cd web-app && npm run dev
    ```
 
-5. **Access the application:**
+4. **Access the application:**
    - **Web App**: http://localhost:3001
-   - **API Documentation**: http://localhost:3000
+   - **API Documentation**: http://localhost:3000/api-docs
    - **Health Check**: http://localhost:3000/health
 
-## 🏗️ **System Architecture**
-
-```
-dogs/
-├── src/                    # Backend API (Port 3000)
-│   ├── controllers/       # Request handlers
-│   ├── database/         # SQLite database service
-│   ├── routes/           # API endpoints
-│   ├── types/            # TypeScript interfaces
-│   ├── pact/             # Contract testing
-│   └── index.ts          # Express server
-├── web-app/              # Frontend (Port 3001)
-│   ├── src/
-│   │   ├── components/   # React components
-│   │   ├── services/     # API integration
-│   │   ├── types/        # Shared types
-│   │   ├── test/         # Playwright E2E tests
-│   │   └── utils/        # Utility functions
-│   ├── public/           # Static assets
-│   └── package.json      # Frontend dependencies
-├── .github/workflows/    # CI/CD pipeline
-├── package.json          # Backend dependencies
-└── README.md            # Complete documentation
-```
-
-## 🎨 **Features**
-
-### **Backend API Features**
-- ✅ **Complete CRUD Operations** - Create, Read, Update, Delete dog breeds
-- ✅ **Search Functionality** - Search breeds by name, breed group, or temperament
-- ✅ **Pagination** - Efficient pagination for large datasets
-- ✅ **Input Validation** - Comprehensive validation using express-validator
-- ✅ **Error Handling** - Consistent error responses with proper HTTP status codes
-- ✅ **SQLite Database** - Lightweight, file-based database with automatic seeding
-- ✅ **Security** - Helmet.js for security headers, CORS support
-- ✅ **TypeScript** - Full type safety and IntelliSense support
-- ✅ **Testing** - Jest-based unit and integration tests
-- ✅ **Contract Testing** - Pact integration for API compatibility
-
-### **Frontend Web App Features**
-- ✅ **Modern UI** - Beautiful, responsive interface with Tailwind CSS
-- ✅ **Breed Management** - View, create, edit, delete breeds with intuitive forms
-- ✅ **Real-time Search** - Instant search functionality with debouncing
-- ✅ **Pagination** - Smooth pagination with navigation controls
-- ✅ **Responsive Design** - Mobile-first approach, works on all devices
-- ✅ **Loading States** - Smooth loading indicators and skeleton screens
-- ✅ **Error Handling** - User-friendly error messages and validation
-- ✅ **TypeScript** - Full type safety throughout the application
-- ✅ **E2E Testing** - Playwright tests for complete user workflows
-
-### **Testing & Quality Assurance**
-- ✅ **Unit Tests** - Jest-based tests for backend logic
-- ✅ **Integration Tests** - API endpoint testing with Supertest
-- ✅ **Contract Tests** - Pact consumer/provider testing
-- ✅ **E2E Tests** - Playwright tests for complete user workflows
-- ✅ **CI/CD Pipeline** - GitHub Actions for automated testing
-- ✅ **Code Quality** - ESLint and Prettier for consistent code style
-
-## 📊 **API Endpoints**
-
-### Base URL
-```
-http://localhost:3000/api/breeds
-```
+## 🔌 API
 
 ### Core Endpoints
+- `GET /api/breeds` - Get all breeds (with pagination)
+- `GET /api/breeds/search?q=query` - Search breeds
+- `GET /api/breeds/:id` - Get breed by ID
+- `POST /api/breeds` - Create new breed
+- `PUT /api/breeds/:id` - Update breed
+- `DELETE /api/breeds/:id` - Delete breed
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | Get all breeds (with pagination) |
-| `GET` | `/search?q=query` | Search breeds |
-| `GET` | `/:id` | Get breed by ID |
-| `POST` | `/` | Create new breed |
-| `PUT` | `/:id` | Update breed |
-| `DELETE` | `/:id` | Delete breed |
+### System Endpoints
+- `GET /` - API information
+- `GET /health` - Health check
 
-### Additional Endpoints
+### Example API Usage
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | API documentation and endpoints list |
-| `GET` | `/health` | Health check |
-| `POST` | `/_pactSetup` | Pact provider state management |
-
-## 🧪 **Testing**
-
-### Running Tests
-
+**Get all breeds with pagination:**
 ```bash
-# Backend tests
-npm test                    # Run all backend tests
-npm run test:unit          # Run unit tests only
-npm run test:pact          # Run Pact contract tests
-
-# Frontend tests
-cd web-app
-npm test                   # Run Jest tests
-npx playwright test        # Run E2E tests
-npx playwright test --ui   # Run E2E tests with UI
+curl "http://localhost:3000/api/breeds?page=1&limit=5"
 ```
 
-### Test Coverage
-
-- **Backend**: Unit tests, integration tests, Pact contract tests
-- **Frontend**: Component tests, API integration tests, Playwright E2E tests
-- **CI/CD**: Automated testing on every push and pull request
-
-## 🔄 **CI/CD Pipeline**
-
-The project includes a comprehensive GitHub Actions workflow that:
-
-1. **Installs Dependencies** - Both backend and frontend
-2. **Builds Applications** - TypeScript compilation and Vite build
-3. **Runs Unit Tests** - Jest tests for backend logic
-4. **Runs Contract Tests** - Pact consumer/provider verification
-5. **Runs E2E Tests** - Playwright tests with backend server
-6. **Reports Results** - Detailed test results and coverage
-
-### Workflow Triggers
-- Push to main branch
-- Pull requests to main branch
-
-## 📱 **User Interface**
-
-### **Main Features**
-1. **Breed List** - Grid layout with pagination and search
-2. **Breed Detail** - Comprehensive breed information display
-3. **Breed Form** - Create and edit breeds with validation
-4. **Search** - Real-time search with instant results
-5. **Navigation** - Clean, intuitive navigation with React Router
-
-### **Design Highlights**
-- **Modern Design**: Clean, professional interface with Tailwind CSS
-- **Responsive**: Mobile-first approach, works on all screen sizes
-- **Accessibility**: Proper ARIA labels and keyboard navigation
-- **Performance**: Fast loading with Vite and optimized builds
-- **User Experience**: Intuitive interactions with proper feedback
-
-## 🔧 **Development**
-
-### Available Scripts
-
-#### Backend (dogs/)
+**Search breeds:**
 ```bash
-npm run dev          # Start development server with hot reload
-npm run build        # Build for production
-npm start            # Start production server
-npm test             # Run all tests
-npm run test:unit    # Run unit tests only
-npm run test:pact    # Run Pact contract tests
-npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint errors
+curl "http://localhost:3000/api/breeds/search?q=golden"
 ```
 
-#### Frontend (web-app/)
+**Create a new breed:**
+```bash
+curl -X POST "http://localhost:3000/api/breeds" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Border Collie",
+    "breed_group": "Herding",
+    "temperament": "Intelligent, Energetic, Responsive",
+    "life_span": "12-15 years",
+    "height_cm": { "min": 46, "max": 56 },
+    "weight_kg": { "min": 14, "max": 20 },
+    "description": "The Border Collie is a working and herding dog breed."
+  }'
+```
+
+### API Features
+- Complete CRUD operations for dog breeds
+- Search functionality across multiple fields
+- Pagination for large datasets
+- Input validation and error handling
+- SQLite database with automatic seeding
+- Security headers with Helmet.js
+- Comprehensive testing with Jest
+- Pact contract testing integration
+
+## 📚 Swagger Documentation
+
+### Interactive API Documentation
+- **Swagger UI**: http://localhost:3000/api-docs
+- **OpenAPI JSON**: http://localhost:3000/api-docs.json
+
+### Adding New Endpoints
+To document new endpoints, add JSDoc comments:
+
+```typescript
+/**
+ * @swagger
+ * /api/breeds/{id}:
+ *   get:
+ *     summary: Get breed by ID
+ *     description: Retrieve a specific dog breed by its unique identifier
+ *     tags: [Breeds]
+ *     parameters:
+ *       - $ref: '#/components/parameters/BreedId'
+ *     responses:
+ *       200:
+ *         description: Successful response with breed data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/DogBreed'
+ */
+router.get('/:id', breedController.getBreedById);
+```
+
+### External Tool Integration
+
+**Postman:**
+1. Import `docs/openapi.json` into Postman
+2. All endpoints will be automatically configured
+
+**Insomnia:**
+1. Create a new API specification
+2. Import `docs/openapi.json`
+
+**Code Generation:**
+```bash
+# Using OpenAPI Generator
+openapi-generator-cli generate -i docs/openapi.json -g typescript-fetch -o ./generated-client
+
+# Using Swagger Codegen
+swagger-codegen generate -i docs/openapi.json -l typescript-fetch -o ./generated-client
+```
+
+## 🎨 Frontend
+
+### Features
+- Modern React 18 with TypeScript
+- Beautiful UI with Tailwind CSS
+- Responsive design for all devices
+- Real-time search and pagination
+- Form validation and error handling
+- Loading states and user feedback
+- E2E testing with Playwright
+
+### User Workflows
+
+**Browse Breeds:**
+- User visits the homepage
+- Sees a grid of breed cards with images
+- Can navigate through pages
+- Can click on any breed to view details
+
+**Search Breeds:**
+- User clicks "Search" in navigation
+- Enters search terms
+- Results update in real-time
+- Can search by name, group, or temperament
+
+**Add New Breed:**
+- User clicks "Add Breed" button
+- Fills out comprehensive form
+- Form validates input in real-time
+- Breed is created and user is redirected
+
+**Edit Breed:**
+- User clicks edit icon on any breed
+- Form is pre-populated with current data
+- User can update any field
+- Changes are saved and user is redirected
+
+**Delete Breed:**
+- User clicks delete icon
+- Confirmation dialog appears
+- Breed is removed from database
+- List updates automatically
+
+## 🧪 Testing
+
+### Unit Tests
+
+**Backend Unit Tests:**
+```bash
+npm run test:unit
+```
+
+Tests individual components in isolation:
+- Controller logic
+- Database service methods
+- Utility functions
+- Validation logic
+
+**Frontend Unit Tests:**
+```bash
+cd web-app && npm test
+```
+
+Tests React components and utilities:
+- Component rendering
+- User interactions
+- State management
+- Utility functions
+
+### Integration Tests
+
+**API Integration Tests:**
+```bash
+npm test
+```
+
+Tests complete API workflows:
+- Endpoint functionality
+- Database integration
+- Error handling
+- Response formats
+
+**Frontend Integration Tests:**
+Tests component interactions:
+- Form submissions
+- API calls
+- State updates
+- Navigation flows
+
+### Functional Tests
+
+**Backend Functional Tests:**
+Tests complete business logic:
+- CRUD operations
+- Search functionality
+- Pagination
+- Data validation
+
+**Frontend Functional Tests:**
+Tests user-facing functionality:
+- Complete user workflows
+- Data display
+- Form interactions
+- Error scenarios
+
+### Contract Tests
+
+Pact ensures API compatibility between the web app (consumer) and API (provider):
+
+**Setup Pact Broker:**
+```bash
+./pact-broker-setup.sh
+```
+
+**Run Consumer Tests (Generate Contracts):**
+```bash
+cd web-app && npm run test:pact:consumer
+```
+
+**Run Provider Tests (Verify Contracts):**
+```bash
+npm run test:pact:provider
+```
+
+**Pact Configuration:**
+```typescript
+export const pactConfig = {
+  consumer: 'DogBreedsWebApp',
+  provider: 'DogBreedsAPI',
+  pactDir: path.resolve(process.cwd(), 'pacts'),
+  logDir: path.resolve(process.cwd(), 'logs'),
+  logLevel: 'info',
+  spec: 2,
+  cors: true,
+  host: '127.0.0.1',
+  port: 1234,
+};
+```
+
+**State Handlers:**
+- `has breeds in database` - Ensures breeds exist for testing
+- `has breed with id 1` - Ensures specific breed exists
+- `breed does not exist` - Ensures breed doesn't exist (for 404 tests)
+- `database is empty` - Clears database for creation tests
+- `API is running` - Ensures API is healthy
+
+
+### UI Tests
+
+**E2E Tests with Playwright:**
+```bash
+cd web-app && npx playwright test
+```
+
+Tests complete user workflows:
+- User registration and login
+- Breed management workflows
+- Search and pagination
+- Form validation
+- Error handling
+
+**UI Test Features:**
+- Cross-browser testing (Chrome, Firefox, Safari)
+- Visual regression testing
+- Performance testing
+- Accessibility testing
+- Mobile responsiveness testing
+
+## 🔄 CI/CD
+
+### GitHub Actions Workflow
+
+The project includes automated CI/CD pipeline:
+
+```yaml
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: |
+        npm ci
+        cd web-app && npm ci
+    
+    - name: Run backend tests
+      run: npm test
+    
+    - name: Run frontend tests
+      run: |
+        cd web-app
+        npm test
+    
+    - name: Run E2E tests
+      run: |
+        cd web-app
+        npx playwright install
+        npx playwright test
+    
+    - name: Run Pact contract tests
+      run: npm run test:pact
+```
+
+### Pipeline Stages
+
+1. **Install Dependencies** - Both backend and frontend
+2. **Build Applications** - TypeScript compilation and Vite build
+3. **Run Unit Tests** - Jest tests for backend logic
+4. **Run Integration Tests** - API endpoint testing
+5. **Run Contract Tests** - Pact consumer/provider verification
+6. **Run E2E Tests** - Playwright tests with backend server
+7. **Report Results** - Detailed test results and coverage
+
+### Quality Gates
+
+- All unit tests must pass
+- All integration tests must pass
+- All contract tests must pass
+- All E2E tests must pass
+- Code coverage thresholds met
+- Linting passes without errors
+
+## 🔧 Development Scripts
+
+### Backend
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
-npm run preview      # Preview production build
-npm test             # Run Jest tests
-npx playwright test  # Run E2E tests
+npm start            # Start production server
+npm test             # Run all tests
 npm run lint         # Run ESLint
 ```
 
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | `3000` | Backend server port |
-| `HOST` | `localhost` | Backend server host |
-| `NODE_ENV` | `development` | Environment mode |
-
-## 📚 **Documentation**
-
-- **[API Documentation](API_SUMMARY.md)** - Complete API reference
-- **[Web App Documentation](WEB_APP_SUMMARY.md)** - Frontend system overview
-- **[Pact Testing Guide](PACT_TESTING.md)** - Contract testing setup and usage
-- **[Demo System](demo-system.sh)** - Complete system demonstration script
-
-## 🚀 **Deployment**
-
-### Local Development
+### Frontend
 ```bash
-# Start both services
-npm run dev          # Backend on port 3000
-cd web-app && npm run dev  # Frontend on port 3001
-```
-
-### Production Build
-```bash
-# Build backend
-npm run build
-npm start
-
-# Build frontend
 cd web-app
-npm run build
-npm run preview
+npm run dev          # Start development server
+npm run build        # Build for production
+npm test             # Run tests
+npx playwright test  # Run E2E tests
 ```
 
-## 🤝 **Contributing**
+## 🎉 Sample Data
+
+The API comes pre-seeded with three popular dog breeds:
+- Golden Retriever
+- German Shepherd
+- Labrador Retriever
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+2. Create a feature branch
 3. Make your changes
 4. Add tests for new functionality
 5. Run the complete test suite
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
+6. Submit a Pull Request
 
 ### Development Guidelines
 - Follow TypeScript best practices
@@ -273,26 +438,6 @@ npm run preview
 - Update documentation as needed
 - Follow the existing code style
 
-## 📄 **License**
+## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🎉 **Sample Data**
-
-The API comes pre-seeded with three popular dog breeds:
-- Golden Retriever
-- German Shepherd
-- Labrador Retriever
-
-You can start using the system immediately without adding any data!
-
-## 🔗 **Quick Links**
-
-- **Live Demo**: [Web Application](http://localhost:3001)
-- **API Docs**: [Backend API](http://localhost:3000)
-- **Health Check**: [API Status](http://localhost:3000/health)
-- **Pact Broker**: [Contract Testing](http://localhost:9292) (when running)
-
----
-
-**Built with ❤️ using TypeScript, React, Express, and modern web technologies** 
+This project is licensed under the MIT License. 
