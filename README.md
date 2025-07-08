@@ -27,7 +27,7 @@ A complete, full-stack web application for managing dog breeds, featuring a Type
 
 1. **Clone and navigate to the project:**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/j-alcock/dogs.git
    cd dogs
    ```
 
